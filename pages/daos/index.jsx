@@ -7,8 +7,10 @@ import useContract from '../../services/useContract';
 import { Button, Modal } from '@heathmont/moon-core-tw';
 import { ControlsPlus, GenericUsers } from '@heathmont/moon-icons-tw';
 import CreateDaoModal from '../../features/CreateDaoModal';
+import { usePolkadotContext } from '../../contexts/PolkadotContext';
 
 export default function DAOs() {
+  const { api, GetAllDaos } = usePolkadotContext();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDaoModal, setShowCreateDaoModal] = useState(false);
@@ -16,43 +18,21 @@ export default function DAOs() {
   const { contract } = useContract();
 
   useEffect(() => {
-    fetchContractData();
-  }, [contract]);
+    fetchData()
+  }, [contract, api]);
+  async function fetchData() {
+    if (contract && api){
+      setLoading(true)
+      let arr = await GetAllDaos();
+      setLoading(false)
+      setList(arr);
+    }
 
-  async function fetchContractData() {
-    setLoading(true);
-    //Fetching data from Smart contract
-    try {
-      if (contract) {
-        const totalDao = await contract.get_all_daos(); //Getting total dao (Number)
-        const arr = [];
-        for (let i = 0; i < Object.keys(totalDao).length; i++) {
-          //total dao number Iteration
-          const object = JSON.parse(totalDao[i]);
-
-          if (object) {
-            arr.push({
-              //Pushing all data into array
-              daoId: i,
-              Title: object.properties.Title.description,
-              Start_Date: object.properties.Start_Date.description,
-              logo: object.properties.logo.description?.url,
-              wallet: object.properties.wallet.description,
-              SubsPrice: object.properties?.SubsPrice?.description
-            });
-          }
-        }
-        setList(arr);
-        /** TODO: Fix fetch to get completed ones as well */
-        if (document.getElementById('Loading')) document.getElementById('Loading').style = 'display:none';
-      }
-    } catch (error) {}
-
-    setLoading(false);
   }
 
   function closeModal() {
     setShowCreateDaoModal(false);
+    fetchData();
   }
   function openModal() {
     setShowCreateDaoModal(true);
