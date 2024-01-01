@@ -65,7 +65,7 @@ export default function Welcome() {
               objectFit: 'cover'
             }}
           />
-          <ActivityCard
+          {/* <ActivityCard
             className="pointer-events-none"
             hideGoToButton
             type="idea"
@@ -80,7 +80,7 @@ export default function Welcome() {
                 logo: '/home/feed-example.png'
               }
             }}
-          />
+          /> */}
         </div>
       </div>
       <div className={`${styles.section} ${styles['section-dark']}`}>

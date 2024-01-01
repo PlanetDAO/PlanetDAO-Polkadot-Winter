@@ -9,8 +9,6 @@ import { enUS } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import useContract from '../../../services/useContract';
 
-
-
 const JoinActivity = ({ data }) => (
   <div className="flex gap-4 w-full items-center">
     <Avatar size="lg" className="rounded-full bg-goku shrink-0">
@@ -33,20 +31,18 @@ const BadgeActivity = ({ data }) => (
   </div>
 );
 
-function VoteActivity ({ data }) {
-  
+function VoteActivity({ data }) {
   const { contract } = useContract();
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
-    Title: "",
+    Title: '',
     donation: 0,
     votes: 0,
-    logo: "",
+    logo: '',
     isVoted: false,
-    isOwner: false,
+    isOwner: false
   });
-
 
   async function fetchContractData() {
     if (contract) {
@@ -61,8 +57,6 @@ function VoteActivity ({ data }) {
         if (element == Number(window.userid)) isvoted = true;
       }
 
-
-
       setIdeaURI({
         ideasId: Number(data.ideasid),
         Title: object.Title.description,
@@ -70,42 +64,43 @@ function VoteActivity ({ data }) {
         donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
         votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
         isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false,
+        isOwner: object.user_id.description == Number(window.userid) ? true : false
       });
     }
   }
 
   useEffect(() => {
-    fetchContractData()
+    fetchContractData();
   }, [contract]);
 
-  return <div className="flex flex-col gap-3">
-    <div className="flex gap-4 w-full items-center">
-      <Avatar size="lg" className="rounded-full bg-dodoria-60 text-bulma shrink-0">
-        <GenericHeart className="text-moon-32" />
-      </Avatar>
-      <p>
-        <span className="font-bold">{data.votesAmount} people voted</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
-      </p>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-4 w-full items-center">
+        <Avatar size="lg" className="rounded-full bg-dodoria-60 text-bulma shrink-0">
+          <GenericHeart className="text-moon-32" />
+        </Avatar>
+        <p>
+          <span className="font-bold">{data.votesAmount} people voted</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
+        </p>
+      </div>
+      <IdeaCard item={ideaURI} preview />
     </div>
-    <IdeaCard item={ideaURI} preview />
-  </div>
-};
+  );
+}
 
 function GoalActivity({ data }) {
   const { contract } = useContract();
 
   const [goalURI, setGoalURI] = useState({
     goalId: 0,
-    Title: "",
-    Description: "",
-    Budget: "",
+    Title: '',
+    Description: '',
+    Budget: '',
     End_Date: new Date(),
-    logo: "",
+    logo: '',
     ideasCount: 0,
-    reached:0
+    reached: 0
   });
-
 
   async function fetchContractData() {
     if (contract) {
@@ -122,9 +117,7 @@ function GoalActivity({ data }) {
         const ideasId = await contract.get_ideas_id_by_ideas_uri(element);
         let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
         total_reached += donation;
-     
       }
-
 
       setGoalURI({
         goalId: Number(data.goalid),
@@ -132,41 +125,42 @@ function GoalActivity({ data }) {
         logo: goalURI.logo.description?.url,
         Budget: goalURI.Budget.description,
         ideasCount: Object.keys(totalIdeas).filter((item, idx) => item !== '').length,
-        reached:total_reached
+        reached: total_reached
       });
     }
   }
 
   useEffect(() => {
-    fetchContractData()
-  }, [contract])
+    fetchContractData();
+  }, [contract]);
 
-  return <div className="flex flex-col gap-3">
-    <div className="flex gap-4 w-full items-center">
-      <Avatar size="lg" className="rounded-full bg-jiren text-bulma shrink-0">
-        <SportDarts className="text-moon-32" />
-      </Avatar>
-      <p>
-        <span className="text-piccolo">{data.name}</span> just created a goal
-      </p>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-4 w-full items-center">
+        <Avatar size="lg" className="rounded-full bg-jiren text-bulma shrink-0">
+          <SportDarts className="text-moon-32" />
+        </Avatar>
+        <p>
+          <span className="text-piccolo">{data.name}</span> just created a goal
+        </p>
+      </div>
+      <GoalCard item={goalURI} preview />
     </div>
-    <GoalCard item={goalURI} preview />
-  </div>
-};
+  );
+}
 
 function DonationActivity({ data }) {
   const { contract } = useContract();
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
-    Title: "",
+    Title: '',
     donation: 0,
     votes: 0,
-    logo: "",
+    logo: '',
     isVoted: false,
-    isOwner: false,
+    isOwner: false
   });
-
 
   async function fetchContractData() {
     if (contract) {
@@ -180,7 +174,6 @@ function DonationActivity({ data }) {
         const element = Allvotes[i];
         if (element == Number(window.userid)) isvoted = true;
       }
-    
 
       setIdeaURI({
         ideasId: Number(data.ideasid),
@@ -189,27 +182,28 @@ function DonationActivity({ data }) {
         donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
         votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
         isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false,
+        isOwner: object.user_id.description == Number(window.userid) ? true : false
       });
     }
   }
 
   useEffect(() => {
-    fetchContractData()
+    fetchContractData();
   }, [contract]);
 
-  return <div className="flex flex-col gap-3">
-    <div className="flex gap-4 w-full items-center">
-      <Avatar size="lg" className="rounded-full bg-cell text-bulma shrink-0">
-        <ShopWallet className="text-moon-32" />
-      </Avatar>
-      <p>
-        <span className="font-bold">DEV {data.donated} donated</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
-      </p>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-4 w-full items-center">
+        <Avatar size="lg" className="rounded-full bg-cell text-bulma shrink-0">
+          <ShopWallet className="text-moon-32" />
+        </Avatar>
+        <p>
+          <span className="font-bold">DEV {data.donated} donated</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
+        </p>
+      </div>
+      <IdeaCard item={ideaURI} preview />
     </div>
-    <IdeaCard item={ideaURI} preview />
-  </div>
-
+  );
 }
 
 function IdeaActivity({ data, hideGoToButton }) {
@@ -217,14 +211,13 @@ function IdeaActivity({ data, hideGoToButton }) {
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
-    Title: "",
+    Title: '',
     donation: 0,
     votes: 0,
-    logo: "",
+    logo: '',
     isVoted: false,
-    isOwner: false,
+    isOwner: false
   });
-
 
   async function fetchContractData() {
     if (contract) {
@@ -239,8 +232,6 @@ function IdeaActivity({ data, hideGoToButton }) {
         if (element == Number(window.userid)) isvoted = true;
       }
 
-
-
       setIdeaURI({
         ideasId: Number(data.ideasid),
         Title: object.Title.description,
@@ -248,49 +239,45 @@ function IdeaActivity({ data, hideGoToButton }) {
         donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
         votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
         isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false,
+        isOwner: object.user_id.description == Number(window.userid) ? true : false
       });
     }
   }
 
   useEffect(() => {
-    fetchContractData()
-  }, [contract])
+    fetchContractData();
+  }, [contract]);
 
-  return <div className="flex flex-col gap-3">
-    <div className="flex gap-4 w-full items-center">
-      <Avatar size="lg" className="rounded-full bg-krillin-60 text-bulma shrink-0">
-        <GenericIdea className="text-moon-32" />
-      </Avatar>
-      <p>
-        <span className="text-piccolo">{data.name}</span> just created an idea for the goal <span className="font-bold">{data.goalTitle}</span>
-      </p>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-4 w-full items-center">
+        <Avatar size="lg" className="rounded-full bg-krillin-60 text-bulma shrink-0">
+          <GenericIdea className="text-moon-32" />
+        </Avatar>
+        <p>
+          <span className="text-piccolo">{data.name}</span> just created an idea for the goal <span className="font-bold">{data.goalTitle}</span>
+        </p>
+      </div>
+      <IdeaCard item={ideaURI} hideGoToButton={hideGoToButton} preview />
     </div>
-    <IdeaCard item={ideaURI} hideGoToButton={hideGoToButton} preview />
-  </div>
-};
+  );
+}
 
 const ActivityCard = ({ old_date, type, data, className, hideGoToButton }) => {
-  const [formattedDuration, SetformattedDuration] = useState("")
+  const [formattedDuration, SetformattedDuration] = useState('');
 
   useEffect(() => {
     if (isValid(old_date)) {
-      var date = new Date()
-      var now_utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(),
-        date.getUTCDate(), date.getUTCHours(),
-        date.getUTCMinutes(), date.getUTCSeconds()));
+      var date = new Date();
+      var now_utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()));
       const duration = intervalToDuration({ start: now_utc, end: old_date });
       // Format the duration
 
       SetformattedDuration(`${formatDuration(duration, { format: ['days', 'minutes'], zero: false })} ago`);
-
     } else {
       SetformattedDuration(``);
-
     }
-
-
-  }, [])
+  }, []);
 
   return (
     <Card className={`max-w-[540px] flex flex-col !p-4 relative ${className}`}>

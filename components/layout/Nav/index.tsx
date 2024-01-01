@@ -30,7 +30,7 @@ export function Nav(): JSX.Element {
       running = false;
       return;
     }
-    if (window.localStorage.getItem('login-type') === 'metamask') {
+    if (window.localStorage.getItem('login-type') === 'metamask' && (await window.ethereum._metamask.isUnlocked())) {
       if (window?.ethereum?.selectedAddress?.toLocaleLowerCase() != null && api && userInfo) {
         try {
           const Web3 = require('web3');
@@ -94,6 +94,13 @@ export function Nav(): JSX.Element {
       setSigned(false);
       window.document.getElementById('withoutSign').style.display = '';
       window.document.getElementById('withSign').style.display = 'none';
+
+      window.localStorage.setItem('loggedin', '');
+      window.localStorage.setItem('login-type', '');
+
+      if (location.pathname !== '/') {
+        window.location.href = '/';
+      }
     }
   }
   useEffect(() => {
@@ -135,8 +142,8 @@ export function Nav(): JSX.Element {
         <ul className="flex justify-between items-center w-full">
           {isSigned && (
             <>
-              {hasJoinedCommunities && <NavItem highlight={router.pathname.includes('/joined')} link="/joined" label="Joined communities" />}
-              <NavItem highlight={router.pathname.includes('/daos')} link="/daos" label="Communities" />
+              {hasJoinedCommunities && <NavItem highlight={router.pathname === '/joined'} link="/joined" label="Joined communities" />}
+              <NavItem highlight={router.pathname === '/daos'} link="/daos" label="Communities" />
               <NavItem label="Create Your Community" onClick={openModal} />
             </>
           )}
