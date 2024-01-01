@@ -21,7 +21,7 @@ export default function GrantIdeas() {
   const [isJoined, setIsJoined] = useState(false);
 
   const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '', isVoted: true, isOwner: true, allfiles: [] });
-  const [DonatemodalShow, setDonatemodalShow] = useState(false);
+  const [DonatemodalShow, setDonateModalShow] = useState(false);
   const [VotingShow, setVotingShow] = useState(false);
   const [AccountAddress, setAccountAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,6 @@ export default function GrantIdeas() {
     fetchContractData();
   }, [contract, api]);
 
-
   useEffect(() => {
     DesignSlide();
   });
@@ -93,7 +92,7 @@ export default function GrantIdeas() {
         const object = JSON.parse(ideaURI); //Getting ideas uri
         Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
         setGoal_id(Goalid);
-        let isJoined = await contract.is_person_joined(Number( Goalid),Number(window.userid));
+        let isJoined = await contract.is_person_joined(Number(Goalid), Number(window.userid));
         setIsJoined(isJoined);
 
         const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
@@ -197,28 +196,25 @@ export default function GrantIdeas() {
       return;
     }
     setVoting(true);
-    const showBadgesAmount = [10, 50, 100, 150, 200, 250, 500]
+    const showBadgesAmount = [10, 50, 100, 150, 200, 250, 500];
     let shouldAdd = false;
     const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
     let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
     const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
     const goalURI = JSON.parse(goalURIFull.goal_uri);
-  
 
     let feed = JSON.stringify({
       votesAmount: IdeasURI.votesAmount + 1,
       goalTitle: goalURI.properties.Title.description,
       ideasid: Number(id)
-    })
+    });
 
     if (showBadgesAmount.includes(IdeasURI.votesAmount + 1)) {
       shouldAdd = true;
     }
 
-
     try {
       await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(Number(Goalid), Number(id), Number(window.userid), feed, shouldAdd));
-
     } catch (error) {
       console.error(error);
       setVoting(false);
@@ -229,7 +225,7 @@ export default function GrantIdeas() {
   }
 
   async function onClickDonate() {
-    setDonatemodalShow(true);
+    setDonateModalShow(true);
   }
 
   async function removeElementFromArrayBYID(all, specificid, seting) {
@@ -248,7 +244,7 @@ export default function GrantIdeas() {
 
   async function PostComment(e) {
     e.preventDefault();
-    setCommenting(true)
+    setCommenting(true);
     let messLatestId = Number(await contract._message_ids());
     let newComment = {
       userid: Number(window.userid),
@@ -262,7 +258,7 @@ export default function GrantIdeas() {
     newComment.user_info = userInfo;
     setCommentsList([...CommentsList, newComment]);
     setComment('');
-    setCommenting(false)
+    setCommenting(false);
     removeElementFromArrayBYID(emptydata, 0, setemptydata);
   }
 
@@ -286,6 +282,12 @@ export default function GrantIdeas() {
   }
 
   const uniqueAndSort = (comments) => Array.from(new Map(comments.map((item) => [item.id, item])).values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  function closeDonateModal(event) {
+    if (event) {
+      setDonateModalShow(false);
+    }
+  }
 
   return (
     <>
@@ -332,11 +334,13 @@ export default function GrantIdeas() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              {isJoined && <Button iconLeft={<ShopWallet />} onClick={onClickDonate}>
+              {isJoined && (
+                <Button iconLeft={<ShopWallet />} onClick={onClickDonate}>
                   Donate
                 </Button>
-              }
-              {!IdeasURI.isOwner && isJoined &&
+              )}
+              {!IdeasURI.isOwner &&
+                isJoined &&
                 (IdeasURI.isVoted ? (
                   <Button iconLeft={<GenericHeart fill="red" color="red" />} variant="secondary" disabled={true}>
                     Voted
@@ -388,14 +392,7 @@ export default function GrantIdeas() {
         </div>
       </div>
 
-      <DonateCoinModal
-        ideasid={ideaId}
-        show={DonatemodalShow}
-        onHide={() => {
-          setDonatemodalShow(false);
-        }}
-        address={AccountAddress}
-      />
+      <DonateCoinModal ideasid={ideaId} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} />
       <VoteConviction
         goal_id={Goal_id}
         idea_id={ideaId}

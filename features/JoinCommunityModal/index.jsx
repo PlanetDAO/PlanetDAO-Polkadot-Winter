@@ -23,7 +23,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
   });
 
   const { BatchJoin, getUSDPriceForChain } = useUtilsContext();
-  const { userInfo} = usePolkadotContext();
+  const { userInfo } = usePolkadotContext();
 
   function ShowAlert(type = 'default', message) {
     alertBox = document.querySelector('[name=alertbox]');
@@ -58,31 +58,30 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
     setisSent(false);
 
     setisLoading(true);
-      let feed = JSON.stringify({
-        name: userInfo?.fullName?.toString()
-      })
+    let feed = JSON.stringify({
+      name: userInfo?.fullName?.toString()
+    });
     if (Number(window.ethereum.networkVersion) === 1287) {
       //If it is sending from Moonbase so it will use batch precompiles
       ShowAlert('pending', 'Sending Batch Transaction....');
 
-      await BatchJoin(Amount, address, Number(dao_id),feed);
+      await BatchJoin(Amount, address, Number(dao_id), feed);
 
       ShowAlert('success', 'Purchased Subscription successfully!');
-      
     } else {
-      let output = await sendTransfer(Number(window.ethereum.networkVersion),`${Number( Amount) }`, address, ShowAlert);
+      let output = await sendTransfer(Number(window.ethereum.networkVersion), `${Number(Amount)}`, address, ShowAlert);
       setTransaction({
         link: output.transaction,
         token: output?.wrappedAsset
       });
       // Saving Joined Person on smart contract
-      await sendTransaction(await window.contract.populateTransaction.join_community(dao_id, Number(window.userid),feed));
+      await sendTransaction(await window.contract.populateTransaction.join_community(dao_id, Number(window.userid), feed));
     }
     window.location.reload();
     LoadData();
     setisLoading(false);
     setisSent(true);
-    onHide();
+    onHide({ success: true });
   }
 
   async function LoadData() {
@@ -127,9 +126,17 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
           <div className="flex flex-col gap-8 w-full p-8">
             <div className="flex justify-between pt-8">
               <h4 className="font-semibold text-moon-18">Total</h4>
-              <h4 className="font-semibold text-moon-18">{Amount} {Token}</h4>
+              <h4 className="font-semibold text-moon-18">
+                {Amount} {Token}
+              </h4>
             </div>
-            {Amount > Balance ? <p className="pb-8 text-right text-dodoria">Insufficient funds</p> : <p className="pb-8 text-right">Your balance is {Balance} {Token}</p>}
+            {Amount > Balance ? (
+              <p className="pb-8 text-right text-dodoria">Insufficient funds</p>
+            ) : (
+              <p className="pb-8 text-right">
+                Your balance is {Balance} {Token}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-between border-t border-beerus w-full p-6">

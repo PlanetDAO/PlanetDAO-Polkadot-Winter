@@ -1,5 +1,5 @@
 import { Button, Tabs } from '@heathmont/moon-core-tw';
-import { ControlsPlus, GenericEdit, GenericIdea } from '@heathmont/moon-icons-tw';
+import { ControlsPlus, GenericIdea } from '@heathmont/moon-icons-tw';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 import IdeaCard from '../../../../components/components/IdeaCard';
@@ -34,7 +34,7 @@ export default function Goal() {
   const [isJoined, setIsJoined] = useState(false);
 
   const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
-  const [DonatemodalShow, setDonatemodalShow] = useState(false);
+  const [DonatemodalShow, setDonateModalShow] = useState(false);
   const [selectedIdeasId, setSelectedIdeasId] = useState(-1);
   const [selectedIdeasWallet, setSelectedIdeasWallet] = useState('');
 
@@ -68,7 +68,7 @@ export default function Goal() {
         let goalDAO = allDaos.filter((e) => (e.daoId = goalURIFull.dao_id))[0];
 
         let user_info = await getUserInfoById(Number(goalURI.properties?.user_id?.description));
-        let isJoined = await contract.is_person_joined(Number( goalDAO.id),Number(window.userid));
+        let isJoined = await contract.is_person_joined(Number(goalDAO.id), Number(window.userid));
         setIsJoined(isJoined);
 
         const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(id)); //Getting total goal (Number)
@@ -131,7 +131,7 @@ export default function Goal() {
     }
   }
   async function DonateToIdeas(ideasId, wallet) {
-    setDonatemodalShow(true);
+    setDonateModalShow(true);
     setSelectedIdeasId(ideasId);
     setSelectedIdeasWallet(wallet);
   }
@@ -156,6 +156,12 @@ export default function Goal() {
     idealist[index].isVoted = !idealist[index].isVoted;
     idealist[index].votes += 1;
     setList(idealist.reverse());
+  }
+
+  function closeDonateModal(event) {
+    if (event) {
+      setDonateModalShow(false);
+    }
   }
 
   return (
@@ -193,7 +199,7 @@ export default function Goal() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              {(GoalURI.isOwner || isJoined) ? (
+              {GoalURI.isOwner || isJoined ? (
                 <>
                   {' '}
                   <Button iconLeft={<ControlsPlus />} onClick={openCreateIdeaModal}>
@@ -254,14 +260,7 @@ export default function Goal() {
         )}
       </div>
       <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} />
-      <DonateCoinModal
-        ideasid={selectedIdeasId}
-        show={DonatemodalShow}
-        onHide={() => {
-          setDonatemodalShow(false);
-        }}
-        address={selectedIdeasWallet}
-      />
+      <DonateCoinModal ideasid={selectedIdeasId} show={DonatemodalShow} onHide={closeDonateModal} address={selectedIdeasWallet} />
     </>
   );
 }

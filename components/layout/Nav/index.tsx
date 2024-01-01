@@ -149,7 +149,7 @@ export function Nav(): JSX.Element {
           )}
 
           <li className="Nav walletstatus flex flex-1 justify-end">
-            <div className="py-2 px-4 flex gap-2 items-center" id="withoutSign">
+            <div className="flex gap-2 items-center" id="withoutSign">
               <Link href="/register">
                 <Button variant="ghost" className="!text-white !bg-transparent w-32">
                   Register
@@ -171,13 +171,9 @@ export function Nav(): JSX.Element {
                   </div>
                   <Dropdown value={null} onChange={null}>
                     <Dropdown.Trigger>
-                      {logo !== '' ? (
-                        <img src={'https://' + logo + '.ipfs.nftstorage.link'} alt="" className="rounded-full border-2 w-12 h-12 object-cover border-piccolo" />
-                      ) : (
-                        <Avatar size="lg" className="rounded-full border-2 border-piccolo ">
-                          <GenericUser className="text-moon-24" />
-                        </Avatar>
-                      )}
+                      <Avatar imageUrl={'https://' + logo + '.ipfs.nftstorage.link'} size="lg" className="rounded-full border-2 border-piccolo ">
+                        <GenericUser className="text-moon-24" />
+                      </Avatar>
                     </Dropdown.Trigger>
 
                     <Dropdown.Options className="bg-gohan w-48 min-w-0">

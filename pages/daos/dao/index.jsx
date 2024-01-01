@@ -21,7 +21,7 @@ export default function DAO() {
   const [daoIdTxt, setDaoTxtID] = useState('');
   const [daoId, setDaoID] = useState(-1);
   const { contract, signerAddress } = useContract();
-  const [JoinmodalShow, setJoinmodalShow] = useState(false);
+  const [JoinmodalShow, setJoinModalShow] = useState(false);
   const [showCreateGoalModal, setShowCreateGoalModal] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -46,7 +46,7 @@ export default function DAO() {
   }
 
   async function JoinCommunity() {
-    setJoinmodalShow(true);
+    setJoinModalShow(true);
   }
 
   function getDaoID() {
@@ -64,11 +64,11 @@ export default function DAO() {
     }
   }
 
- async function leaveCommunity() {
-    setLeaving(true)
+  async function leaveCommunity() {
+    setLeaving(true);
     try {
       // Leaving Community in Smart contract
-      await sendTransaction(await window.contract.populateTransaction.leave_community( Number(JoinedID)));
+      await sendTransaction(await window.contract.populateTransaction.leave_community(Number(JoinedID)));
       toast.update(ToastId, {
         render: 'Successful!',
         type: 'success',
@@ -78,12 +78,11 @@ export default function DAO() {
         closeOnClick: true,
         draggable: true
       });
-      window.setTimeout(()=>{window.location.reload()},1000)
-    } catch (error) {  
-    }
-    setLeaving(false)
-
-  
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {}
+    setLeaving(false);
   }
 
   async function UpdateDaoData(dao_uri, template_html) {
@@ -91,8 +90,8 @@ export default function DAO() {
 
     setIsOwner(daoURI.properties?.user_id?.description.toString() === window?.userid?.toString() ? true : false);
     let user_info = await getUserInfoById(daoURI.properties?.user_id?.description);
-    let isJoined = await contract.is_person_joined(daoId,Number(window.userid));
-    setJoinedID(await contract.get_person_joinedID(daoId,Number(window.userid)));
+    let isJoined = await contract.is_person_joined(daoId, Number(window.userid));
+    setJoinedID(await contract.get_person_joinedID(daoId, Number(window.userid)));
     setIsJoined(isJoined);
 
     let daoURIShort = {
@@ -114,7 +113,6 @@ export default function DAO() {
 
   async function fetchDaoData() {
     setLoading(true);
-
 
     if (daoId !== undefined && daoId !== null && api && daoId != -1) {
       //Fetching data from Parachain
@@ -165,7 +163,6 @@ export default function DAO() {
               const ideasId = await contract.get_ideas_id_by_ideas_uri(element);
               let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
               total_reached += donation;
-           
             }
 
             arr.push({
@@ -196,6 +193,12 @@ export default function DAO() {
   }
   function openCreateGoalModal() {
     setShowCreateGoalModal(true);
+  }
+
+  function closeJoinCommunityModal(event) {
+    if (event) {
+      setJoinModalShow(false);
+    }
   }
 
   return (
@@ -232,7 +235,7 @@ export default function DAO() {
                 </Button>
               )}
 
-              {(isJoined  && !isOwner) && (
+              {isJoined && !isOwner && (
                 <Button onClick={leaveCommunity} iconLeft={<GenericLogOut />} variant="secondary">
                   Leave
                 </Button>
@@ -254,7 +257,6 @@ export default function DAO() {
                   Join
                 </Button>
               )}
-
             </div>
           </div>
           <div className="container">
@@ -269,7 +271,7 @@ export default function DAO() {
         </div>
         {tabIndex === 0 && (
           <div className="container flex gap-6">
-            <CommunityFeed /> <TopCommunityMembers daoid={daoIdTxt} />
+            <CommunityFeed communityName={DaoURI.Title} /> <TopCommunityMembers daoid={daoIdTxt} />
           </div>
         )}
         {tabIndex === 1 && <div className="container" dangerouslySetInnerHTML={{ __html: aboutTemplate }}></div>}
@@ -282,16 +284,7 @@ export default function DAO() {
 
       <CreateGoalModal open={showCreateGoalModal} onClose={closeCreateGoalModal} />
 
-      <JoinCommunityModal
-        SubsPrice={DaoURI.SubsPrice}
-        show={JoinmodalShow}
-        onHide={() => {
-          setJoinmodalShow(false);
-        }}
-        address={DaoURI.wallet}
-        title={DaoURI.Title}
-        dao_id={daoId}
-      />
+      <JoinCommunityModal SubsPrice={DaoURI.SubsPrice} show={JoinmodalShow} onHide={closeJoinCommunityModal} address={DaoURI.wallet} title={DaoURI.Title} dao_id={daoId} />
     </>
   );
 }
