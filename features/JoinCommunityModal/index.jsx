@@ -65,7 +65,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
       //If it is sending from Moonbase so it will use batch precompiles
       ShowAlert('pending', 'Sending Batch Transaction....');
 
-      await BatchJoin(Amount, address, Number(dao_id), feed);
+      await BatchJoin(Amount, address, dao_id, feed);
 
       ShowAlert('success', 'Purchased Subscription successfully!');
     } else {
@@ -74,6 +74,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
         link: output.transaction,
         token: output?.wrappedAsset
       });
+
       // Saving Joined Person on smart contract
       await sendTransaction(await window.contract.populateTransaction.join_community(dao_id, Number(window.userid), feed));
     }

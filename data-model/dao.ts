@@ -5,6 +5,7 @@ export interface Dao {
   logo: string;
   wallet: string;
   SubsPrice: string;
+  user_id: string;
   user_info: {
     id: number;
     fullName: string;

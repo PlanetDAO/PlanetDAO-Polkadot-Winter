@@ -5,6 +5,9 @@ import { sortDateDesc } from '../../utils/sort-date';
 import AddPostCard from '../../components/components/AddPostCard';
 import CreatePostModal from '../CreatePostModal';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
+import Loader from '../../components/components/Loader';
+import EmptyState from '../../components/components/EmptyState';
+import { SportDarts } from '@heathmont/moon-icons-tw';
 
 const CommunityFeed = ({ communityName }) => {
   const [loading, setLoading] = useState(false);
@@ -60,9 +63,7 @@ const CommunityFeed = ({ communityName }) => {
   return (
     <div className="flex flex-col gap-2 w-full items-center pb-10 min-w-[540px]">
       <AddPostCard avatarUrl={avatarUrl} onClick={() => setShowPostModal(true)} />
-      {Items.map((item, index) => (
-        <ActivityCard key={index} old_date={item.date} type={item.type} data={item.data}></ActivityCard>
-      ))}
+      <Loader element={Items.length > 0 ? Items.map((item, index) => <ActivityCard key={index} old_date={item.date} type={item.type} data={item.data}></ActivityCard>) : <EmptyState icon={<SportDarts className="text-moon-48" />} label="There are no posts in the feed yet." />} width={540} height={120} many={3} loading={loading} />
       <CreatePostModal onClose={closeShowPostModal} show={showPostModal} avatarUrl={avatarUrl} userName={userName} communityName={communityName} />
     </div>
   );

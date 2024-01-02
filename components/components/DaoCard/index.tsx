@@ -2,12 +2,12 @@ import Image from 'next/legacy/image';
 import Card from '../Card';
 import { Dao } from '../../../data-model/dao';
 import { Button } from '@heathmont/moon-core-tw';
-import { ArrowsRightShort, GenericUsers } from '@heathmont/moon-icons-tw';
+import { ArrowsRightShort, ControlsPlus, GenericUsers } from '@heathmont/moon-icons-tw';
 import { intervalToDuration, isPast, parseISO } from 'date-fns';
 import Link from 'next/link';
-import { useState } from 'react';
+import { MouseEventHandler, useState } from 'react';
 
-const DAOCard = ({ item }: { item: Dao }) => {
+const DAOCard = ({ item, onJoinCommunity, hasJoined }: { item: Dao; onJoinCommunity?: MouseEventHandler<HTMLButtonElement>; hasJoined: boolean }) => {
   const [showPlaceholder, setShowPlaceholder] = useState(false);
 
   // Format the duration
@@ -48,11 +48,18 @@ const DAOCard = ({ item }: { item: Dao }) => {
             </a>
           </p>
           {!hasAlreadyPast ? <p className="text-hit font-bold">Opens in {formattedDuration}</p> : <p className="text-hit font-bold">Opened</p>}
-          <Link href={`/daos/dao?[${item.daoId}]`}>
-            <Button className="absolute bottom-0 right-0" iconLeft={<ArrowsRightShort />}>
-              Go to community
+          {hasJoined && (
+            <Link href={`/daos/dao?[${item.daoId}]`}>
+              <Button className="absolute bottom-0 right-0" iconLeft={<ArrowsRightShort />}>
+                Go to community
+              </Button>
+            </Link>
+          )}
+          {!hasJoined && (
+            <Button className="absolute bottom-0 right-0" iconLeft={<ControlsPlus />} onClick={onJoinCommunity}>
+              Join
             </Button>
-          </Link>
+          )}
         </div>
       </div>
     </Card>
