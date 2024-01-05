@@ -5,6 +5,7 @@ import AddImageInput from '../../components/components/AddImageInput';
 
 const CreatePostModal = ({ show, onClose, avatarUrl, userName, communityName }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [text, setText] = useState('');
 
   function createPost() {
     setIsLoading(true);
@@ -35,7 +36,7 @@ const CreatePostModal = ({ show, onClose, avatarUrl, userName, communityName }) 
                 </div>
               </div>
             </div>
-            <Textarea placeholder="What do you want to share with the community?" className="bg-goten min-h-[88px]" />
+            <Textarea placeholder="What do you want to share with the community?" className="bg-goten min-h-[88px]" value={text} onChange={(e) => setText(e.target.value)} />
             <AddImageInput className="w-full !h-[200px]" onClick={uploadImage} />
           </div>
 
@@ -43,7 +44,7 @@ const CreatePostModal = ({ show, onClose, avatarUrl, userName, communityName }) 
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={createPost} animation={isLoading ? 'progress' : null} disabled={isLoading}>
+            <Button onClick={createPost} animation={isLoading ? 'progress' : null} disabled={isLoading || !text}>
               Create post
             </Button>
           </div>

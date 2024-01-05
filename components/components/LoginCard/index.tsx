@@ -1,4 +1,4 @@
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
 import Card from '../Card';
 import { Button } from '@heathmont/moon-core-tw';
 import { SoftwareLogin } from '@heathmont/moon-icons-tw';
@@ -12,7 +12,7 @@ const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { st
 
   const [Email, EmailInput] = UseFormInput({
     defaultValue: '',
-    type: 'email',
+    type: 'text',
     placeholder: 'Email',
     id: ''
   });
@@ -50,11 +50,7 @@ const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { st
           return;
         }
       } else {
-        toast.update(id, { render: 'Incorrect email or password!', type: 'error', 
-        autoClose: 1000,
-        closeButton: true,
-        closeOnClick: true,
-        draggable: true,isLoading: false });
+        toast.update(id, { render: 'Incorrect email or password!', type: 'error', autoClose: 1000, closeButton: true, closeOnClick: true, draggable: true, isLoading: false });
       }
     };
     await api._extrinsics.users.loginUser(Email, Password).signAndSend(deriveAcc, ({ status, events }) => {
@@ -84,6 +80,10 @@ const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { st
     }
   }
 
+  function isDisabled(): boolean {
+    return !(Email && Password);
+  }
+
   const LoginForm = () => (
     <Card className="max-w-[480px]">
       <div className="flex w-full flex-col gap-10">
@@ -100,7 +100,9 @@ const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { st
           </div>
         </div>
         <div className="flex w-full justify-end">
-          <Button onClick={OnClickLoginStep1}>Next</Button>
+          <Button onClick={OnClickLoginStep1} disabled={isDisabled()}>
+            Next
+          </Button>
         </div>
       </div>
     </Card>

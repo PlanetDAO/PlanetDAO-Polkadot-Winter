@@ -383,7 +383,7 @@ export default function GrantIdeas() {
               </div>
             </form>
           </div>
-          <div className="flex flex-col gap-6 pb-8">{uniqueAndSort(CommentsList).map((listItem, index) => (listItem.address !== '' ? <CommentBox user_info={listItem.user_info} address={listItem.address} MessageID={listItem.id} MessageIndex={index} date={listItem.date} sendReply={sendReply} message={listItem.message} replies={listItem.replies} id={listItem.id} key={listItem.id} /> : <></>))}</div>
+          <div className="flex flex-col gap-6 pb-8">{uniqueAndSort(CommentsList).map((listItem, index) => (listItem.address !== '' ? <CommentBox user_info={listItem.user_info} address={listItem.address} MessageID={listItem.id} MessageIndex={index} date={listItem.date} sendReply={sendReply} message={listItem.message} replies={listItem.replies} id={listItem.id} key={index} /> : <></>))}</div>
         </div>
       </div>
 

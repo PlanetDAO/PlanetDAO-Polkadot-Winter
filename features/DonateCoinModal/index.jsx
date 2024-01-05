@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import Alert from '@mui/material/Alert';
 import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
 import { ethers } from 'ethers';
 import { useUtilsContext } from '../../contexts/UtilsContext';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
@@ -14,6 +12,7 @@ import { sendTransfer } from '../../services/wormhole/useSwap';
 import { Button, Dropdown, IconButton, Modal } from '@heathmont/moon-core-tw';
 import { ControlsClose } from '@heathmont/moon-icons-tw';
 import UseFormInput from '../../components/components/UseFormInput';
+import Required from '../../components/components/Required';
 
 export default function DonateCoin({ ideasid, show, onHide, address }) {
   const [Balance, setBalance] = useState('');
@@ -129,6 +128,10 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
     setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
   }
 
+  function isInvalid() {
+    return !Amount;
+  }
+
   useEffect(() => {
     LoadData();
   }, [show, Coin]);
@@ -173,7 +176,10 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
               </div>
 
               <div className="flex flex-col gap-2 p-6 pt-3">
-                <h6>Amount</h6>
+                <h6>
+                  Amount
+                  <Required />
+                </h6>
                 {AmountInput}
                 <p className="text-moon-12">Your balance is {Balance} </p>
               </div>
@@ -182,7 +188,7 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
                 <Button variant="ghost" onClick={onHide}>
                   Cancel
                 </Button>
-                <Button animation={isLoading && 'progress'} disabled={isLoading} type="submit" id="CreateGoalBTN">
+                <Button animation={isLoading && 'progress'} disabled={isLoading || isInvalid()} type="submit" id="CreateGoalBTN">
                   Donate
                 </Button>
               </div>

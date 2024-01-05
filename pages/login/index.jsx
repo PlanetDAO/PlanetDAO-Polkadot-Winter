@@ -11,7 +11,7 @@ export default function Login() {
   const [step, setStep] = useState(1);
 
   const router = useRouter();
- useEffect(() => {
+  useEffect(() => {
     setConnectionStatus();
   }, []);
 
@@ -41,9 +41,7 @@ export default function Login() {
     }
   };
 
- 
   async function onConnectMetamask() {
-
     if (!hasMetamask) {
       window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn', '_blank');
       return;
@@ -98,7 +96,6 @@ export default function Login() {
     setIsConnected(false);
     setHasMetamask(false);
     setHasPolkadot(true);
-
   }
 
   async function onConnectPolkadot() {
@@ -106,16 +103,13 @@ export default function Login() {
       window.open('https://chromewebstore.google.com/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd', '_blank');
       return;
     }
-    const {web3Enable} = require('@polkadot/extension-dapp');
+    const { web3Enable } = require('@polkadot/extension-dapp');
     await web3Enable('PlanetDAO');
     window.localStorage.setItem('loggedin', 'true');
     window.localStorage.setItem('login-type', 'polkadot');
     setIsConnected(true);
     setHasPolkadot(true);
-
   }
-
-
 
   return (
     <>

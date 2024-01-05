@@ -9,6 +9,7 @@ import useContract from '../../services/useContract';
 import AddImageInput from '../../components/components/AddImageInput';
 import ImageListDisplay from '../../components/components/ImageListDisplay';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
+import Required from '../../components/components/Required';
 
 import { toast } from 'react-toastify';
 
@@ -180,7 +181,7 @@ export default function CreateIdeaModal({ show, onClose, goalId }) {
     return (
       <>
         <div className="flex gap-4 justify-end">
-          <Button id="CreateIdeasBTN" animation={creating && 'progress'} disabled={creating} onClick={createIdeas}>
+          <Button id="CreateIdeasBTN" animation={creating && 'progress'} disabled={creating || isInvalid()} onClick={createIdeas}>
             <ControlsPlus className="text-moon-24" />
             Create idea
           </Button>
@@ -229,6 +230,10 @@ export default function CreateIdeaModal({ show, onClose, goalId }) {
     setIdeasImage(newImages);
   }
 
+  function isInvalid() {
+    return !(IdeasTitle && IdeasDescription && IdeasImage.length > 0);
+  }
+
   return (
     <Modal open={show} onClose={onClose}>
       <Modal.Backdrop />
@@ -240,12 +245,18 @@ export default function CreateIdeaModal({ show, onClose, goalId }) {
           </div>
           <div className="flex flex-col gap-6 w-full p-6 max-h-[calc(90vh-162px)] overflow-auto">
             <div className="flex flex-col gap-2">
-              <h6>Ideas name</h6>
+              <h6>
+                Idea name
+                <Required />
+              </h6>
               {IdeasTitleInput}
             </div>
 
             <div className="flex flex-col gap-2">
-              <h6>Description</h6>
+              <h6>
+                Description
+                <Required />
+              </h6>
               {IdeasDescriptionInput}
             </div>
             {/* <div className="flex flex-col gap-2">
@@ -254,7 +265,10 @@ export default function CreateIdeaModal({ show, onClose, goalId }) {
             </div> */}
 
             <div className="flex flex-col gap-2">
-              <h6>Image</h6>
+              <h6>
+                Image
+                <Required />
+              </h6>
               <div className="content-start flex flex-row flex-wrap gap-4 justify-start overflow-auto p-1 relative text-center text-white w-full">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="IdeasImage" name="IdeasImage" type="file" multiple="multiple" />
                 <div className="flex flex-col gap-4">

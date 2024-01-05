@@ -1,6 +1,5 @@
-import { Button, Checkbox, IconButton, Modal } from '@heathmont/moon-core-tw';
-import { ControlsClose, ControlsPlus, GenericPicture } from '@heathmont/moon-icons-tw';
-import { useRouter } from 'next/router';
+import { Button, IconButton, Modal } from '@heathmont/moon-core-tw';
+import { ControlsClose, ControlsPlus } from '@heathmont/moon-icons-tw';
 import { NFTStorage } from 'nft.storage';
 import React, { useEffect, useState } from 'react';
 import UseFormInput from '../../components/components/UseFormInput';
@@ -12,6 +11,7 @@ import isServer from '../../components/isServer';
 import AddImageInput from '../../components/components/AddImageInput';
 import ImageListDisplay from '../../components/components/ImageListDisplay';
 import { toast } from 'react-toastify';
+import Required from '../../components/components/Required';
 
 let addedDate = false;
 export default function CreateDaoModal({ open, onClose }) {
@@ -185,7 +185,9 @@ export default function CreateDaoModal({ open, onClose }) {
 
         setCreating(false);
         onClose({ success: true });
-        window.setTimeout(()=>{window.location.reload()},1000)
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } catch (error) {
         console.error(error);
         setCreating(false);
@@ -193,7 +195,6 @@ export default function CreateDaoModal({ open, onClose }) {
         return;
       }
     }
-
   }
 
   function FilehandleChange(dao) {
@@ -207,6 +208,10 @@ export default function CreateDaoModal({ open, onClose }) {
     }
   }
 
+  function isInvalid() {
+    return !(DaoTitle && DaoDescription && RecieveWallet && StartDate && SubsPrice && DaoImage.length > 0);
+  }
+
   function AddBTNClick() {
     var DaoImagePic = document.getElementById('DaoImage');
     DaoImagePic.click();
@@ -216,7 +221,7 @@ export default function CreateDaoModal({ open, onClose }) {
     return (
       <>
         <div className="flex gap-4 justify-end">
-          <Button id="CreateDAOBTN" animation={creating && 'progress'} disabled={creating} onClick={createDao}>
+          <Button id="CreateDAOBTN" animation={creating && 'progress'} disabled={creating || isInvalid()} onClick={createDao}>
             <ControlsPlus className="text-moon-24" />
             Create Dao
           </Button>
@@ -250,30 +255,48 @@ export default function CreateDaoModal({ open, onClose }) {
           </div>
           <div className="flex flex-col gap-6 w-full p-6 max-h-[calc(90vh-162px)] overflow-auto">
             <div className="flex flex-col gap-2">
-              <h6>Community name</h6>
+              <h6>
+                Community name
+                <Required />
+              </h6>
               {DaoTitleInput}
             </div>
 
             <div className="flex flex-col gap-2">
-              <h6>Description</h6>
+              <h6>
+                Description
+                <Required />
+              </h6>
               {DaoDescriptionInput}
             </div>
             <div className="flex flex-col gap-2">
-              <h6>Recipeint</h6>
+              <h6>
+                Recipeint
+                <Required />
+              </h6>
               {RecieveWalletInput}
             </div>
             <div className="flex flex-col gap-2">
-              <h6>Start Date</h6>
+              <h6>
+                Start Date
+                <Required />
+              </h6>
               {StartDateInput}
             </div>
 
             <div className="flex flex-col gap-2">
-              <h6>Monthly subscription in USD</h6>
+              <h6>
+                Monthly subscription in USD
+                <Required />
+              </h6>
               {SubsPriceInput}
             </div>
 
             <div className="flex flex-col gap-2">
-              <h6>Image</h6>
+              <h6>
+                Image
+                <Required />
+              </h6>
               <div className="flex gap-4">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="DaoImage" name="DaoImage" type="file" />
                 <div className="flex flex-col gap-4">

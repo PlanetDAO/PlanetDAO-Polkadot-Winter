@@ -7,6 +7,8 @@ import { Avatar, Button, IconButton } from '@heathmont/moon-core-tw';
 import { useState } from 'react';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { toast } from 'react-toastify';
+import validator from 'validator';
+import Required from '../../components/components/Required';
 
 export default function Register() {
   const { api, deriveAcc, showToast } = usePolkadotContext();
@@ -24,7 +26,7 @@ export default function Register() {
 
   const [Email, EmailInput] = UseFormInput({
     defaultValue: '',
-    type: 'email',
+    type: 'text',
     placeholder: 'Add email',
     id: ''
   });
@@ -50,8 +52,8 @@ export default function Register() {
   async function registerAccount() {
     const id = toast.loading('Uploading IPFS ...');
     const metadata = image.type ? await client.storeBlob(image) : '';
- 
-    toast.update(id, { render: "Registering User...", isLoading: true });
+
+    toast.update(id, { render: 'Registering User...', isLoading: true });
 
     const doAfter = () => {
       setTimeout(() => {
@@ -61,6 +63,10 @@ export default function Register() {
     await api._extrinsics.users.registerUser(Fullname, Email, Password, metadata).signAndSend(deriveAcc, ({ status }) => {
       showToast(status, id, 'Registered Successfully!', doAfter);
     });
+  }
+
+  function isDisabled() {
+    return !(Fullname && validator.isEmail(Email) && Password);
   }
 
   return (
@@ -92,21 +98,30 @@ export default function Register() {
 
             <div className="flex flex-col gap-6 w-full">
               <div className="flex flex-col gap-2">
-                <h6>Full Name</h6>
+                <h6>
+                  Full Name
+                  <Required />
+                </h6>
                 {FullnameInput}
               </div>
               <div className="flex flex-col gap-2">
-                <h6>Email</h6>
+                <h6>
+                  Email
+                  <Required />
+                </h6>
                 {EmailInput}
               </div>
               <div className="flex flex-col gap-2">
-                <h6>Password</h6>
+                <h6>
+                  Password
+                  <Required />
+                </h6>
                 {PasswordInput}
               </div>
             </div>
 
             <div className="flex w-full justify-end">
-              <Button id="RegisterBTN" onClick={registerAccount}>
+              <Button id="RegisterBTN" onClick={registerAccount} disabled={isDisabled()}>
                 Register
               </Button>
             </div>

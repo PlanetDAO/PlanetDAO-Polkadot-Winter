@@ -9,6 +9,7 @@ import useContract from '../../services/useContract';
 import AddImageInput from '../../components/components/AddImageInput';
 import ImageListDisplay from '../../components/components/ImageListDisplay';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
+import Required from '../../components/components/Required';
 
 import { toast } from 'react-toastify';
 
@@ -47,7 +48,7 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
 
   const [Budget, BudgetInput] = UseFormInput({
     defaultValue: '',
-    type: 'text',
+    type: 'number',
     placeholder: '0.00',
     id: 'goal'
   });
@@ -194,6 +195,11 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
     }
     setGoalImage(newImages);
   }
+
+  function isInvalid() {
+    return !(GoalTitle && GoalDescription && Budget && EndDate && GoalImage.length > 0);
+  }
+
   useEffect(() => {
     let dateTime = new Date();
     if (!addedDate) setEndDate(dateTime.toISOString().split('T')[0]);
@@ -210,28 +216,43 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
           </div>
           <div className="flex flex-col gap-6 w-full p-6  max-h-[calc(90vh-162px)] overflow-auto">
             <div className="flex flex-col gap-2">
-              <h6>Goal name</h6>
+              <h6>
+                Goal name
+                <Required />
+              </h6>
               {GoalTitleInput}
             </div>
 
             <div className="flex flex-col gap-2">
-              <h6>Description</h6>
+              <h6>
+                Description
+                <Required />
+              </h6>
               {GoalDescriptionInput}
             </div>
             <div className="flex gap-8 w-full">
               <div className="flex flex-col gap-2 w-full">
-                <h6>Goal amount in USD</h6>
+                <h6>
+                  Goal amount in USD
+                  <Required />
+                </h6>
                 {BudgetInput}
               </div>
             </div>
             <div className="flex gap-8 w-full">
               <div className="flex-1">
-                <h6>End Date</h6>
+                <h6>
+                  End Date
+                  <Required />
+                </h6>
                 {EndDateInput}
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <h6></h6>
+              <h6>
+                Image
+                <Required />
+              </h6>
               <div className="content-start flex flex-row flex-wrap gap-4 justify-start overflow-auto relative text-center text-white w-full">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="GoalImage" name="GoalImage" type="file" />
                 <div className="flex flex-col gap-4">
@@ -241,7 +262,10 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <h6>Structure</h6>
+              <h6>
+                Structure
+                <Required />
+              </h6>
               <div className="flex gap-8">
                 <div className="bg-white rounded-lg flex flex-1 flex-col gap-1 text-moon-18 font-semibold pb-0 gap-6 pt-3">
                   <h6
@@ -315,7 +339,7 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button id="CreateGoalBTN" animation={creating && 'progress'} disabled={creating} onClick={createGoal}>
+          <Button id="CreateGoalBTN" animation={creating && 'progress'} disabled={creating || isInvalid()} onClick={createGoal}>
             <ControlsPlus className="text-moon-24" />
             Create goal
           </Button>
