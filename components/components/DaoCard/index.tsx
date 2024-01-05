@@ -49,7 +49,7 @@ const DAOCard = ({ item, onJoinCommunity, hasJoined }: { item: Dao; onJoinCommun
           </p>
           {!hasAlreadyPast ? <p className="text-hit font-bold">Opens in {formattedDuration}</p> : <p className="text-hit font-bold">Opened</p>}
           {hasJoined && (
-            <Link href={`/daos/dao?[${item.daoId}]`}>
+            <Link href={`/daos/${item.daoId}`}>
               <Button className="absolute bottom-0 right-0" iconLeft={<ArrowsRightShort />}>
                 Go to community
               </Button>

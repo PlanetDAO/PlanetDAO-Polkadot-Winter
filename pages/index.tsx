@@ -37,10 +37,10 @@ export default function Welcome() {
             <h3 className="text-moon-32 font-bold">Style your community</h3>
             <p>Edit your community page through the PlanetDAO editor, and style it the way you want.</p>
           </div>
-          <Image src="/home/style-community.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/style-community.png" alt="" width={420} height={360} />
         </div>
         <div className="flex homepage-container flex-col items-center md:flex-row md:gap-16 md:items-start">
-          <Image src="/home/raise-funds.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/raise-funds.png" alt="" width={420} height={360} />
           <div className="flex flex-col gap-8 pt-10">
             <h3 className="text-moon-32 font-bold">Raise funds for your community goals</h3>
             <p>Through subscriptions and donations you can raise funds for your decentralized wallet.</p>
@@ -53,10 +53,10 @@ export default function Welcome() {
             <h3 className="text-moon-32 font-bold">Make decisions together</h3>
             <p>Members of a community have voting power based on their role and their contribution. All members can vote on the ideas they believe will reach the community’s goals.</p>
           </div>
-          <Image src="/home/decisions-together.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/decisions-together.png" alt="" width={420} height={360} />
         </div>
         <div className="flex homepage-container flex-col items-center md:flex-row md:gap-16 md:items-start">
-          <Image src="/home/reward-community.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/reward-community.png" alt="" width={420} height={360} />
           <div className="flex flex-col gap-8 pt-10">
             <h3 className="text-moon-32 font-bold">Reward your community</h3>
             <p>The more active you are as a member in your community, the more badges you earn. The more badges you earn, the more voting power you have.</p>
@@ -69,7 +69,7 @@ export default function Welcome() {
             <h3 className="text-moon-32 font-bold">Connect all your wallets</h3>
             <p>By combining Moonbeam and Wormhole cross-chains we connect assets from many different blockchains to scale your DAO community rapidly.</p>
           </div>
-          <Image src="/home/connect-wallets.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/connect-wallets.png" alt="" width={420} height={360} />
         </div>
       </div>
     </>

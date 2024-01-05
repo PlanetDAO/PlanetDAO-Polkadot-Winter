@@ -7,6 +7,7 @@ import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { sendTransfer } from '../../services/wormhole/useSwap';
 import { Button, IconButton, Modal } from '@heathmont/moon-core-tw';
 import { ControlsClose } from '@heathmont/moon-icons-tw';
+import { useRouter } from 'next/router';
 
 export default function JoinCommunityModal({ SubsPrice, show, onHide, address, title, dao_id }) {
   const [Balance, setBalance] = useState('');
@@ -15,6 +16,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
   const [isSent, setisSent] = useState(false);
   const [Amount, setAmount] = useState(0);
   const { contract, signerAddress, sendTransaction } = useContract();
+  const router = useRouter();
 
   let alertBox = null;
   const [transaction, setTransaction] = useState({
@@ -78,7 +80,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
       // Saving Joined Person on smart contract
       await sendTransaction(await window.contract.populateTransaction.join_community(dao_id, Number(window.userid), feed));
     }
-    window.location.reload();
+    router.push(`/daos/${dao_id}`);
     LoadData();
     setisLoading(false);
     setisSent(true);

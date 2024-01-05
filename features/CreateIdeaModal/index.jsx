@@ -1,5 +1,5 @@
 import { Button, IconButton, Modal } from '@heathmont/moon-core-tw';
-import { ControlsClose, ControlsPlus, GenericPicture } from '@heathmont/moon-icons-tw';
+import { ControlsClose, ControlsPlus } from '@heathmont/moon-icons-tw';
 import { NFTStorage } from 'nft.storage';
 import React, { useState } from 'react';
 import UseFormInput from '../../components/components/UseFormInput';
@@ -12,7 +12,7 @@ import { usePolkadotContext } from '../../contexts/PolkadotContext';
 
 import { toast } from 'react-toastify';
 
-export default function CreateIdeaModal({ show, onClose }) {
+export default function CreateIdeaModal({ show, onClose, goalId }) {
   const [IdeasImage, setIdeasImage] = useState([]);
   const [creating, setCreating] = useState(false);
 
@@ -68,8 +68,6 @@ export default function CreateIdeaModal({ show, onClose }) {
     1: '70%',
     2: '10%'
   };
-
-  let id = -1;
 
   //Function after clicking Create Ideas Button
   async function createIdeas() {
@@ -143,7 +141,9 @@ export default function CreateIdeaModal({ show, onClose }) {
     };
     console.log('======================>Creating Ideas');
     toast.update(ToastId, { render: 'Creating Ideas...', isLoading: true });
-    const goalURIFull = await contract._goal_uris(Number(id)); //Getting total goal (Number)
+    console.log('goalId', goalId);
+
+    const goalURIFull = await contract._goal_uris(Number(goalId)); //Getting total goal (Number)
     const goalURI = JSON.parse(goalURIFull.goal_uri);
 
     const ideasID = Number(await contract._ideas_ids());
@@ -154,7 +154,7 @@ export default function CreateIdeaModal({ show, onClose }) {
     });
     try {
       // Creating Ideas in Smart contract
-      await sendTransaction(await window.contract.populateTransaction.create_ideas(JSON.stringify(createdObject), Number(id), smart_contracts, Number(window.userid), feed));
+      await sendTransaction(await window.contract.populateTransaction.create_ideas(JSON.stringify(createdObject), Number(goalId), smart_contracts, Number(window.userid), feed));
       toast.update(ToastId, {
         render: 'Created Successfully!',
         type: 'success',
@@ -199,23 +199,11 @@ export default function CreateIdeaModal({ show, onClose }) {
       setIdeasImage((pre) => [...pre, ideas.target.files[index2]]);
     }
   }
-  if (!isServer()) {
-    const regex = /\[(.*)\]/g;
-    const str = decodeURIComponent(window.location.search);
-    let m;
 
-    while ((m = regex.exec(str)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      id = m[1];
-    }
-  }
   async function CheckTransaction() {
     let params = new URL(window.location).searchParams;
     if (params.get('transactionHashes') !== null) {
-      window.location.href = `daos/dao/goal?[${id}]`;
+      window.location.href = `daos/dao/goal?[${goalId}]`;
     }
   }
 
@@ -270,7 +258,7 @@ export default function CreateIdeaModal({ show, onClose }) {
               <div className="content-start flex flex-row flex-wrap gap-4 justify-start overflow-auto p-1 relative text-center text-white w-full">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="IdeasImage" name="IdeasImage" type="file" multiple="multiple" />
                 <div className="flex flex-col gap-4">
-                  <AddImageInput onClick={AddBTNClick} />
+                  {!IdeasImage.length && <AddImageInput onClick={AddBTNClick} />}
                   <ImageListDisplay images={IdeasImage} onDeleteImage={DeleteSelectedImages} />
                 </div>
               </div>

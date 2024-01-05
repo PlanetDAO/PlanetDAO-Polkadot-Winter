@@ -1796,6 +1796,10 @@ video {
   word-break: break-all;
 }
 
+.\!rounded-moon-s-sm{
+  border-radius: var(--radius-s-sm) !important;
+}
+
 .\!rounded-none{
   border-radius: 0px !important;
 }
@@ -1842,10 +1846,6 @@ video {
 
 .rounded-xl{
   border-radius: 0.75rem;
-}
-
-.\!rounded-moon-s-sm{
-  border-radius: var(--radius-s-sm) !important;
 }
 
 .rounded-b-moon-s-sm{

@@ -2,14 +2,16 @@ import { Button, Tabs } from '@heathmont/moon-core-tw';
 import { ControlsPlus, GenericIdea } from '@heathmont/moon-icons-tw';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
-import IdeaCard from '../../../../components/components/IdeaCard';
-import Loader from '../../../../components/components/Loader';
-import useContract from '../../../../services/useContract';
-import CreateIdeaModal from '../../../../features/CreateIdeaModal';
-import EmptyState from '../../../../components/components/EmptyState';
-import DonateCoinModal from '../../../../features/DonateCoinModal';
-import { usePolkadotContext } from '../../../../contexts/PolkadotContext';
+import IdeaCard from '../../../../../components/components/IdeaCard';
+import Loader from '../../../../../components/components/Loader';
+import useContract from '../../../../../services/useContract';
+import CreateIdeaModal from '../../../../../features/CreateIdeaModal';
+import EmptyState from '../../../../../components/components/EmptyState';
+import DonateCoinModal from '../../../../../features/DonateCoinModal';
+import { usePolkadotContext } from '../../../../../contexts/PolkadotContext';
 import Image from 'next/legacy/image';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Goal() {
   //Variables
@@ -38,19 +40,13 @@ export default function Goal() {
   const [selectedIdeasId, setSelectedIdeasId] = useState(-1);
   const [selectedIdeasWallet, setSelectedIdeasWallet] = useState('');
 
-  const regex = /\[(.*)\]/g;
-  let m;
+  const router = useRouter();
+
   let id = ''; //id from url
 
   useEffect(() => {
-    const str = decodeURIComponent(window.location.search);
-
-    while ((m = regex.exec(str)) !== null) {
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      id = m[1];
-    }
+    setGoalID(router.query.goalId);
+    id = router.query.goalId;
 
     fetchContractData();
   }, [contract, api]);
@@ -175,7 +171,15 @@ export default function Goal() {
         <div className="gap-8 flex flex-col w-full bg-gohan pt-10 border-beerus border">
           <div className="container flex w-full justify-between">
             <div className="flex flex-col gap-1 overflow-hidden">
-              <Loader loading={loading} width={300} element={<h5 className="font-semibold">{GoalURI?.Dao?.Title} &gt; Goals</h5>} />
+              <Loader
+                loading={loading}
+                width={300}
+                element={
+                  <h5 className="font-semibold">
+                    <Link href={`../../${router.query.daoId}`}>{GoalURI?.Dao?.Title}</Link> &gt; Goals
+                  </h5>
+                }
+              />
               <Loader loading={loading} width={300} element={<h1 className="text-moon-32 font-bold">{GoalURI.Title}</h1>} />
               <Loader
                 loading={loading}
@@ -259,7 +263,7 @@ export default function Goal() {
           </div>
         )}
       </div>
-      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} />
+      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} goalId={goalId} />
       <DonateCoinModal ideasid={selectedIdeasId} show={DonatemodalShow} onHide={closeDonateModal} address={selectedIdeasWallet} />
     </>
   );

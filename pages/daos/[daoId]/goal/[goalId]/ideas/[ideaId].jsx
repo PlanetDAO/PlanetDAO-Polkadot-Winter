@@ -1,21 +1,23 @@
 import { Button } from '@heathmont/moon-core-tw';
-import { GenericEdit, GenericHeart, ShopWallet } from '@heathmont/moon-icons-tw';
+import { GenericHeart, ShopWallet } from '@heathmont/moon-icons-tw';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import CommentBox from '../../../../../components/components/CommentBox';
-import SlideShow from '../../../../../components/components/Slideshow';
-import UseFormTextArea from '../../../../../components/components/UseFormTextArea';
-import DonateCoinModal from '../../../../../features/DonateCoinModal';
-import VoteConviction from '../../../../../components/components/modal/VoteConviction';
-import useContract from '../../../../../services/useContract';
+import CommentBox from '../../../../../../components/components/CommentBox';
+import SlideShow from '../../../../../../components/components/Slideshow';
+import UseFormTextArea from '../../../../../../components/components/UseFormTextArea';
+import DonateCoinModal from '../../../../../../features/DonateCoinModal';
+import VoteConviction from '../../../../../../components/components/modal/VoteConviction';
+import useContract from '../../../../../../services/useContract';
 import Image from 'next/legacy/image';
-import Loader from '../../../../../components/components/Loader';
-import { usePolkadotContext } from '../../../../../contexts/PolkadotContext';
+import Loader from '../../../../../../components/components/Loader';
+import { usePolkadotContext } from '../../../../../../contexts/PolkadotContext';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function GrantIdeas() {
   const { api, showToast, getUserInfoById, userInfo, GetAllDaos, PolkadotLoggedIn } = usePolkadotContext();
   const [ideaId, setIdeasId] = useState(-1);
-  const [Goal_id, setGoal_id] = useState(-1);
+  const [goalId, setGoalId] = useState(-1);
   const [PollIndex, setPollIndex] = useState(-1);
   const [imageList, setimageList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
@@ -28,6 +30,8 @@ export default function GrantIdeas() {
   const [voting, setVoting] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const { contract, signerAddress, sendTransaction, saveReadMessage } = useContract();
+
+  const router = useRouter();
 
   const [Comment, CommentInput, setComment] = UseFormTextArea({
     defaultValue: '',
@@ -56,22 +60,14 @@ export default function GrantIdeas() {
     }
   ]);
 
-  let m;
   let id = ''; //Ideas id from url
   let Goalid = ''; //Goal id
 
   useEffect(() => {
-    const regex = /\[(.*)\]/g;
-    const str = decodeURIComponent(window.location.search);
-
-    while ((m = regex.exec(str)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      id = m[1];
-    }
+    setGoalId(router.query.goalId);
+    setIdeasId(router.query.ideaId);
+    id = router.query.ideaId;
+    Goalid = router.query.goalId;
 
     fetchContractData();
   }, [contract, api]);
@@ -90,8 +86,7 @@ export default function GrantIdeas() {
 
         const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
         const object = JSON.parse(ideaURI); //Getting ideas uri
-        Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-        setGoal_id(Goalid);
+
         let isJoined = await contract.is_person_joined(Number(Goalid), Number(window.userid));
         setIsJoined(isJoined);
 
@@ -305,7 +300,7 @@ export default function GrantIdeas() {
                 width={300}
                 element={
                   <h5 className="font-semibold">
-                    {IdeasURI?.daoURI?.Title} &gt; {IdeasURI?.goalURI?.properties?.Title?.description} &gt; {IdeasURI?.Title}
+                    <Link href={`../../../../${router.query.daoId}`}>{IdeasURI?.daoURI?.Title}</Link> &gt; <Link href={`../../../../${router.query.daoId}/goal/${router.query.goalId}`}>{IdeasURI?.goalURI?.properties?.Title?.description}</Link> &gt; {IdeasURI?.Title}
                   </h5>
                 }
               />
@@ -394,7 +389,7 @@ export default function GrantIdeas() {
 
       <DonateCoinModal ideasid={ideaId} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} />
       <VoteConviction
-        goal_id={Goal_id}
+        goal_id={goalId}
         idea_id={ideaId}
         PollIndex={PollIndex}
         show={VotingShow}

@@ -1,5 +1,5 @@
 import { Button, Tabs } from '@heathmont/moon-core-tw';
-import { ControlsPlus, GenericDelete, GenericEdit, GenericLogOut, GenericPlus, SportDarts } from '@heathmont/moon-icons-tw';
+import { GenericEdit, GenericLogOut, GenericPlus, SportDarts } from '@heathmont/moon-icons-tw';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 import useContract from '../../../services/useContract';
@@ -9,9 +9,9 @@ import Link from 'next/link';
 import CreateGoalModal from '../../../features/CreateGoalModal';
 import CommunityFeed from '../../../features/CommunityFeed';
 import TopCommunityMembers from '../../../features/TopCommunityMembers';
-import JoinCommunityModal from '../../../features/JoinCommunityModal';
 import { usePolkadotContext } from '../../../contexts/PolkadotContext';
 import EmptyState from '../../../components/components/EmptyState';
+import { useRouter } from 'next/router';
 
 export default function DAO() {
   //Variables
@@ -29,34 +29,37 @@ export default function DAO() {
   const [loading, setLoading] = useState(true);
   const [aboutTemplate, setAboutTemplate] = useState('');
   const [tabIndex, setTabIndex] = useState(0);
-  const [dao_type, setDaoType] = useState('metamask');
+  const [daoType, setDaoType] = useState('metamask');
 
-  const regex = /\[(.*)\]/g;
-  let m;
+  const router = useRouter();
 
   useEffect(() => {
     getDaoID();
     fetchData();
-  }, [contract, api]);
+  }, [contract, api, router]);
 
   async function fetchData() {
     fetchDaoData();
-    fetchContractDataFull();
+
+    if (router.query.daoId) {
+      fetchContractDataFull();
+    }
   }
 
   function getDaoID() {
-    const str = decodeURIComponent(window.location.search);
+    const daoIdParam = router.query.daoId;
 
-    while ((m = regex.exec(str)) !== null) {
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      let dao_type = m[1].startsWith('m_') ? 'metamask' : 'polkadot';
-      setDaoType(dao_type);
-      let splitter = dao_type == 'metamask' ? 'm_' : 'p_';
-      setDaoID(Number(m[1].split(splitter)[1]));
-      setDaoTxtID(m[1]);
+    if (!daoIdParam) {
+      return;
     }
+
+    const split = daoIdParam.split('_');
+    const type = daoIdParam.startsWith('m_') ? 'metamask' : 'polkadot';
+    const id = split[1];
+
+    setDaoType(type);
+    setDaoID(Number(id));
+    setDaoTxtID(daoIdParam);
   }
 
   async function leaveCommunity() {
@@ -111,15 +114,16 @@ export default function DAO() {
 
     if (daoId !== undefined && daoId !== null && api && daoId != -1) {
       //Fetching data from Parachain
-      if (api && dao_type == 'polkadot') {
+      if (api && daoType == 'polkadot') {
         try {
+          console.log('DaoId here?', daoId);
           const element = await api._query.daos.daoById(Number(daoId));
           let daoURI = element['__internal__raw'].daoUri.toString();
           let template_html = (await api._query.daos.templateById(daoId)).toString();
           UpdateDaoData(daoURI, template_html);
         } catch (e) {}
       }
-      if (contract && dao_type == 'metamask') {
+      if (contract && daoType == 'metamask') {
         //Load everything-----------
         const daoURI = await contract.dao_uri(Number(daoId)); //Getting dao URI
         const template_html = await contract._template_uris(daoId);
@@ -139,6 +143,8 @@ export default function DAO() {
         //Load everything-----------
 
         const totalGoals = await contract.get_all_goals_by_dao_id(daoIdTxt); //Getting all goals by dao id
+
+        console.log('GOALS?', totalGoals);
         const arr = [];
         for (let i = 0; i < Object.keys(totalGoals).length; i++) {
           //total dao number Iteration
@@ -266,7 +272,7 @@ export default function DAO() {
         )}
       </div>
 
-      <CreateGoalModal open={showCreateGoalModal} onClose={closeCreateGoalModal} />
+      <CreateGoalModal open={showCreateGoalModal} onClose={closeCreateGoalModal} daoId={daoIdTxt} />
     </>
   );
 }

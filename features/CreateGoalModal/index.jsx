@@ -13,7 +13,7 @@ import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { toast } from 'react-toastify';
 
 let addedDate = false;
-export default function CreateGoalModal({ open, onClose }) {
+export default function CreateGoalModal({ open, onClose, daoId }) {
   const [GoalImage, setGoalImage] = useState([]);
   const [creating, setCreating] = useState(false);
   const { signerAddress, sendTransaction } = useContract();
@@ -51,7 +51,6 @@ export default function CreateGoalModal({ open, onClose }) {
     placeholder: '0.00',
     id: 'goal'
   });
-  let id = -1;
 
   let StructureLeft = {
     0: 'Representatives Berlin',
@@ -140,7 +139,7 @@ export default function CreateGoalModal({ open, onClose }) {
 
     try {
       // Creating Goal in Smart contract
-      await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), id, Number(window.userid),feed));
+      await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), feed));
       toast.update(ToastId, {
         render: 'Created Successfully!',
         type: 'success',
@@ -160,7 +159,7 @@ export default function CreateGoalModal({ open, onClose }) {
       return;
       // window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
     }
-    window.location.href = `/daos/dao?[${id}]`; //After the success it will redirect the user to dao page
+    window.location.reload(); //After the success it will redirect the user to dao page
   }
 
   function FilehandleChange(goal) {
@@ -174,19 +173,7 @@ export default function CreateGoalModal({ open, onClose }) {
       setGoalImage((pre) => [...pre, goal.target.files[index2]]);
     }
   }
-  if (!isServer()) {
-    const regex = /\[(.*)\]/g;
-    const str = decodeURIComponent(window.location.search);
-    let m;
 
-    while ((m = regex.exec(str)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      id = m[1];
-    }
-  }
   function AddBTNClick(goal) {
     //Clicking on +(Add) Function
     var GoalImagePic = document.getElementById('GoalImage');
