@@ -11,6 +11,7 @@ import CommunityFeed from '../../../features/CommunityFeed';
 import TopCommunityMembers from '../../../features/TopCommunityMembers';
 import { usePolkadotContext } from '../../../contexts/PolkadotContext';
 import EmptyState from '../../../components/components/EmptyState';
+import MembersTable from '../../../features/MembersTable';
 import { useRouter } from 'next/router';
 
 export default function DAO() {
@@ -144,7 +145,6 @@ export default function DAO() {
 
         const totalGoals = await contract.get_all_goals_by_dao_id(daoIdTxt); //Getting all goals by dao id
 
-        console.log('GOALS?', totalGoals);
         const arr = [];
         for (let i = 0; i < Object.keys(totalGoals).length; i++) {
           //total dao number Iteration
@@ -255,6 +255,7 @@ export default function DAO() {
                 <Tabs.Tab>Feed</Tabs.Tab>
                 <Tabs.Tab>About</Tabs.Tab>
                 <Tabs.Tab>Goals ({list.length})</Tabs.Tab>
+                <Tabs.Tab>Members (X)</Tabs.Tab>
               </Tabs.List>
             </Tabs>
           </div>
@@ -268,6 +269,11 @@ export default function DAO() {
         {tabIndex === 2 && (
           <div className="flex flex-col gap-8 container items-center pb-10">
             <Loader element={list.length > 0 ? list.map((listItem, index) => <GoalCard item={listItem} key={index} />) : <EmptyState icon={<SportDarts className="text-moon-48" />} label="This community doesn’t have any goals yet." />} width={768} height={236} many={3} loading={loading} />{' '}
+          </div>
+        )}
+        {tabIndex === 3 && (
+          <div className="flex flex-col gap-8 container items-center pb-10">
+            <MembersTable />
           </div>
         )}
       </div>

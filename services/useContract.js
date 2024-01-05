@@ -44,7 +44,7 @@ export default function useContract() {
 					window.signerAddress = contract.signerAddress;
 
 					setContractInstance(contract);
-					console.clear();
+					// console.clear();
 				} else {
 					const contract = { contract: null, signerAddress: null, sendTransaction: sendTransaction, formatTemplate: formatTemplate, saveReadMessage: saveReadMessage };
 
