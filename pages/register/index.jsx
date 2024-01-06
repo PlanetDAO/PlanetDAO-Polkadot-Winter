@@ -9,11 +9,13 @@ import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { toast } from 'react-toastify';
 import validator from 'validator';
 import Required from '../../components/components/Required';
+import { useRouter } from 'next/router';
 
 export default function Register() {
   const { api, deriveAcc, showToast } = usePolkadotContext();
   const NFT_STORAGE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDJDMDBFOGEzZEEwNzA5ZkI5MUQ1MDVmNDVGNUUwY0Q4YUYyRTMwN0MiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1NDQ3MTgxOTY2NSwibmFtZSI6IlplbmNvbiJ9.6znEiSkiLKZX-a9q-CKvr4x7HS675EDdaXP622VmYs8';
   const client = new NFTStorage({ token: NFT_STORAGE_TOKEN });
+  const router = useRouter();
 
   //Input fields
   const [image, set_Image] = useState({});
@@ -57,7 +59,7 @@ export default function Register() {
 
     const doAfter = () => {
       setTimeout(() => {
-        window.location.href = '/login';
+        router.push('/login');
       }, 1000);
     };
     await api._extrinsics.users.registerUser(Fullname, Email, Password, metadata).signAndSend(deriveAcc, ({ status }) => {

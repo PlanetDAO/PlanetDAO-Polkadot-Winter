@@ -9,13 +9,12 @@ import { Button, IconButton, Modal } from '@heathmont/moon-core-tw';
 import { ControlsClose } from '@heathmont/moon-icons-tw';
 import { useRouter } from 'next/router';
 
-export default function JoinCommunityModal({ SubsPrice, show, onHide, address, title, dao_id }) {
+export default function JoinCommunityModal({ SubsPrice, show, onHide, address, title, daoId }) {
   const [Balance, setBalance] = useState('');
   const [Token, setToken] = useState('');
   const [isLoading, setisLoading] = useState(false);
-  const [isSent, setisSent] = useState(false);
   const [Amount, setAmount] = useState(0);
-  const { contract, signerAddress, sendTransaction } = useContract();
+  const { sendTransaction } = useContract();
   const router = useRouter();
 
   let alertBox = null;
@@ -57,7 +56,8 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
   async function JoinSubmission(e) {
     e.preventDefault();
     console.clear();
-    setisSent(false);
+
+    const daoIdNumber = Number(daoId.split('_')[1]);
 
     setisLoading(true);
     let feed = JSON.stringify({
@@ -67,7 +67,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
       //If it is sending from Moonbase so it will use batch precompiles
       ShowAlert('pending', 'Sending Batch Transaction....');
 
-      await BatchJoin(Amount, address, dao_id, feed);
+      await BatchJoin(Amount, address, daoIdNumber, feed);
 
       ShowAlert('success', 'Purchased Subscription successfully!');
     } else {
@@ -78,12 +78,12 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, t
       });
 
       // Saving Joined Person on smart contract
-      await sendTransaction(await window.contract.populateTransaction.join_community(dao_id, Number(window.userid), feed));
+      await sendTransaction(await window.contract.populateTransaction.join_community(daoIdNumber, Number(window.userid), feed));
     }
-    router.push(`/daos/${dao_id}`);
+
+    router.push(`/daos/${daoId}`);
     LoadData();
     setisLoading(false);
-    setisSent(true);
     onHide({ success: true });
   }
 

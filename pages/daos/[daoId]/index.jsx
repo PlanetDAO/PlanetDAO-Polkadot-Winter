@@ -21,7 +21,7 @@ export default function DAO() {
   const [DaoURI, setDaoURI] = useState({ Title: '', Description: '', SubsPrice: 0, Start_Date: '', End_Date: '', logo: '', wallet: '', typeimg: '', allFiles: [], isOwner: false });
   const [daoIdTxt, setDaoTxtID] = useState('');
   const [daoId, setDaoID] = useState(-1);
-  const { contract, signerAddress } = useContract();
+  const { contract } = useContract();
   const [showCreateGoalModal, setShowCreateGoalModal] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -65,9 +65,12 @@ export default function DAO() {
 
   async function leaveCommunity() {
     setLeaving(true);
+
     try {
       // Leaving Community in Smart contract
       await sendTransaction(await window.contract.populateTransaction.leave_community(Number(JoinedID)));
+
+      router.push('/joined');
       toast.update(ToastId, {
         render: 'Successful!',
         type: 'success',
@@ -77,11 +80,11 @@ export default function DAO() {
         closeOnClick: true,
         draggable: true
       });
-      window.setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {}
-    setLeaving(false);
+
+      setLeaving(false);
+    } catch (error) {
+      setLeaving(false);
+    }
   }
 
   async function UpdateDaoData(dao_uri, template_html) {
@@ -117,7 +120,6 @@ export default function DAO() {
       //Fetching data from Parachain
       if (api && daoType == 'polkadot') {
         try {
-          console.log('DaoId here?', daoId);
           const element = await api._query.daos.daoById(Number(daoId));
           let daoURI = element['__internal__raw'].daoUri.toString();
           let template_html = (await api._query.daos.templateById(daoId)).toString();
@@ -231,7 +233,7 @@ export default function DAO() {
               )}
 
               {isJoined && !isOwner && (
-                <Button onClick={leaveCommunity} iconLeft={<GenericLogOut />} variant="secondary">
+                <Button onClick={leaveCommunity} iconLeft={<GenericLogOut />} variant="secondary" animation={leaving && 'progress'}>
                   Leave
                 </Button>
               )}

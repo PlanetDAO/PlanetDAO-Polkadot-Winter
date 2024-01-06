@@ -9,6 +9,7 @@ import CreateDaoModal from '../../features/CreateDaoModal';
 import useContract from '../../services/useContract';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { Dao } from '../../data-model/dao';
+import { useRouter } from 'next/router';
 declare let window;
 export const Joined = () => {
   const { api, GetAllDaos } = usePolkadotContext();
@@ -17,6 +18,7 @@ export const Joined = () => {
   const [showCreateDaoModal, setShowCreateDaoModal] = useState(false);
 
   const { contract } = useContract();
+  const router = useRouter();
 
   useEffect(() => {
     fetchContractData();
@@ -46,7 +48,11 @@ export const Joined = () => {
           }
         });
 
-        setList(arrList.reverse());
+        if (arrList.length > 0) {
+          setList(arrList.reverse());
+        } else {
+          router.push('/daos');
+        }
       }
     } catch (error) {}
 

@@ -4,7 +4,7 @@ module.exports = {
   presets: [require('@heathmont/moon-core-tw/lib/private/presets/ds-moon-preset.js')],
   theme: {
     extend: {
-      height: {
+      minHeight: {
         'full-min-header': 'calc(100vh - 80px)'
       },
       backgroundColor: {

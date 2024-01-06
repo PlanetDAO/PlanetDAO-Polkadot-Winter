@@ -21,7 +21,7 @@ export default function Welcome() {
         <meta name="description" content="PlanetDAO" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="bg-frieza-60 w-full pb-16 md:h-full-min-header flex flex-col items-center gap-8 px-4">
+      <div className="bg-frieza-60 w-full pb-16 md:min-h-full-min-header flex flex-col items-center gap-8 px-4">
         <div className="flex flex-col gap-4 items-center text-gohan mt-16">
           <h2 className="font-bold text-moon-48">Create a fair and transparent community</h2>
           <h5>PlanetDAO enables you to create your decentralized autonomous organization platform (DAO) in just a few clicks.</h5>

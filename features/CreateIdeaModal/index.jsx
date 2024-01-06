@@ -142,7 +142,6 @@ export default function CreateIdeaModal({ show, onClose, goalId }) {
     };
     console.log('======================>Creating Ideas');
     toast.update(ToastId, { render: 'Creating Ideas...', isLoading: true });
-    console.log('goalId', goalId);
 
     const goalURIFull = await contract._goal_uris(Number(goalId)); //Getting total goal (Number)
     const goalURI = JSON.parse(goalURIFull.goal_uri);

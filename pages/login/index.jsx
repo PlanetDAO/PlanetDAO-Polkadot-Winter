@@ -2,7 +2,6 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import LoginCard from '../../components/components/LoginCard';
 import { useRouter } from 'next/router';
-import isServer from '../../components/isServer';
 
 export default function Login() {
   const [isConnected, setIsConnected] = useState(false);
@@ -17,7 +16,7 @@ export default function Login() {
 
   useEffect(() => {
     if ((hasMetamask || hasPolkadot) && isConnected) {
-      window.location.href = '/daos';
+      window.location.href = '/joined';
     }
   }, [hasMetamask, hasPolkadot, isConnected, router]); // Dependency array
 

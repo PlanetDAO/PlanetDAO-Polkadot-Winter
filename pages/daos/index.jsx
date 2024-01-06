@@ -18,7 +18,6 @@ export default function DAOs() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinedDaosList, setJoinedDaosList] = useState([]);
   const [communityToJoin, setCommunityToJoin] = useState({});
-  const [daoId, setDaoId] = useState(-1);
 
   const { contract } = useContract();
 
@@ -73,7 +72,6 @@ export default function DAOs() {
 
   function openJoinModal(community) {
     setCommunityToJoin(community);
-    setDaoId(community.daoId.split('_')[1]);
     setShowJoinModal(true);
   }
 
@@ -104,7 +102,7 @@ export default function DAOs() {
       </div>
 
       <CreateDaoModal open={showCreateDaoModal} onClose={closeModal} />
-      <JoinCommunityModal SubsPrice={communityToJoin.SubsPrice} show={showJoinModal} onHide={closeJoinCommunityModal} address={communityToJoin.wallet} title={communityToJoin.Title} dao_id={daoId} />
+      <JoinCommunityModal SubsPrice={communityToJoin.SubsPrice} show={showJoinModal} onHide={closeJoinCommunityModal} address={communityToJoin.wallet} title={communityToJoin.Title} daoId={communityToJoin.daoId} />
     </>
   );
 }

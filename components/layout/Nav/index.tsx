@@ -171,9 +171,7 @@ export function Nav(): JSX.Element {
                   </div>
                   <Dropdown value={null} onChange={null}>
                     <Dropdown.Trigger>
-                      <Avatar imageUrl={'https://' + logo + '.ipfs.nftstorage.link'} size="lg" className="rounded-full border-2 border-piccolo ">
-                        <GenericUser className="text-moon-24" />
-                      </Avatar>
+                      <Avatar imageUrl={'https://' + logo + '.ipfs.nftstorage.link'} size="lg" className="rounded-full border-2 border-piccolo "></Avatar>
                     </Dropdown.Trigger>
 
                     <Dropdown.Options className="bg-gohan w-48 min-w-0">
