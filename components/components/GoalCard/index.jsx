@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { ArrowsRightShort, SportDarts } from '@heathmont/moon-icons-tw';
 import { useState } from 'react';
 
-const GoalCard = ({ item, preview }) => {
+const GoalCard = ({ item, preview = false, className = '' }) => {
   const [showPlaceholder, setShowPlaceholder] = useState(false);
 
   return (
-    <Card className={`max-w-[720px] ${preview && '!bg-goku'}`}>
+    <Card className={`max-w-[720px] ${className}`}>
       <div className="flex w-full">
         <div className="rounded-moon-s-md overflow-hidden flex justify-center items-center border border-beerus" style={{ position: 'relative', width: '188px', minWidth: '188px', height: '188px' }}>
           {<Image layout="fill" objectFit="cover" src={item.logo} onError={() => setShowPlaceholder(true)} alt="" />}

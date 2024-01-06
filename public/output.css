@@ -1246,6 +1246,10 @@ video {
   height: 100%;
 }
 
+.h-20{
+  height: 5rem;
+}
+
 .max-h-\[18\.75rem\]{
   max-height: 18.75rem;
 }
@@ -1381,6 +1385,10 @@ video {
 
 .w-px{
   width: 1px;
+}
+
+.w-20{
+  width: 5rem;
 }
 
 .min-w-0{
@@ -3769,6 +3777,14 @@ input[type=file]::-webkit-file-upload-button{
   background-color: transparent;
 }
 
+.hover\:bg-hit\/30:hover{
+  background-color: rgb(var(--hit) / 0.3);
+}
+
+.hover\:bg-piccolo:hover{
+  background-color: rgb(var(--piccolo));
+}
+
 .hover\:text-bulma:hover{
   color: rgb(var(--bulma));
 }
@@ -4205,6 +4221,30 @@ input[type=file]::-webkit-file-upload-button{
   --tw-scale-x: 1;
   --tw-scale-y: 1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.moon-selected\:bg-hit\/30[aria-selected="true"]{
+  background-color: rgb(var(--hit) / 0.3);
+}
+
+.moon-selected\:bg-piccolo[aria-selected="true"]{
+  background-color: rgb(var(--piccolo));
+}
+
+.moon-selected\:text-gohan[aria-selected="true"]{
+  color: rgb(var(--gohan));
+}
+
+:where([aria-selected="true"]) .moon-selected\:bg-hit\/30{
+  background-color: rgb(var(--hit) / 0.3);
+}
+
+:where([aria-selected="true"]) .moon-selected\:bg-piccolo{
+  background-color: rgb(var(--piccolo));
+}
+
+:where([aria-selected="true"]) .moon-selected\:text-gohan{
+  color: rgb(var(--gohan));
 }
 
 .moon-disabled\:cursor-default[aria-disabled="true"]{

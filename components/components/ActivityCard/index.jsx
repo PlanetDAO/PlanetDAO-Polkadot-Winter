@@ -1,11 +1,9 @@
 import { formatDuration, intervalToDuration, isValid } from 'date-fns';
 import Card from '../Card';
-import { Activity } from '../../../data-model/activity';
 import { Avatar, IconButton } from '@heathmont/moon-core-tw';
 import { GenericHeart, GenericIdea, GenericPending, GenericUser, ShopWallet, SportDarts, SportSpecials } from '@heathmont/moon-icons-tw';
 import IdeaCard from '../IdeaCard';
 import GoalCard from '../GoalCard';
-import { enUS } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import useContract from '../../../services/useContract';
 
@@ -83,7 +81,7 @@ function VoteActivity({ data }) {
           <span className="font-bold">{data.votesAmount} people voted</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
         </p>
       </div>
-      <IdeaCard item={ideaURI} preview />
+      <IdeaCard item={ideaURI} className="shadow-none !bg-goku border border-beerus" preview />
     </div>
   );
 }
@@ -144,7 +142,7 @@ function GoalActivity({ data }) {
           <span className="text-piccolo">{data.name}</span> just created a goal
         </p>
       </div>
-      <GoalCard item={goalURI} preview />
+      <GoalCard item={goalURI} preview className="shadow-none !bg-goku border border-beerus" />
     </div>
   );
 }
@@ -201,7 +199,7 @@ function DonationActivity({ data }) {
           <span className="font-bold">DEV {data.donated} donated</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
         </p>
       </div>
-      <IdeaCard item={ideaURI} preview />
+      <IdeaCard item={ideaURI} className="shadow-none !bg-goku border border-beerus" preview />
     </div>
   );
 }
@@ -258,7 +256,7 @@ function IdeaActivity({ data, hideGoToButton }) {
           <span className="text-piccolo">{data.name}</span> just created an idea for the goal <span className="font-bold">{data.goalTitle}</span>
         </p>
       </div>
-      <IdeaCard item={ideaURI} hideGoToButton={hideGoToButton} preview />
+      <IdeaCard item={ideaURI} hideGoToButton={hideGoToButton} className="shadow-none !bg-goku border border-beerus" preview />
     </div>
   );
 }
