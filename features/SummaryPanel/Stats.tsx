@@ -1,17 +1,27 @@
 import ProfileStat from '../../components/components/ProfileStat';
 
-const Stats = () => (
+export interface ProfileStats {
+  daosCreated: number;
+  goalsCreated: number;
+  ideasCreated: number;
+  commentsCreated: number;
+  commentsReceived: number;
+  donationsReceived: number;
+  donated: number;
+}
+
+const Stats = ({ stats }: { stats: ProfileStats }) => (
   <div className="flex flex-col gap-2 w-full">
     <div className="flex w-full gap-2">
-      <ProfileStat value={1} label="DAOs created" />
-      <ProfileStat value={1} label="Goals created" />
-      <ProfileStat value={1} label="Ideas created" />
-      <ProfileStat value={1} label="Comments created" />
-      <ProfileStat value={1} label="Comments received" />
+      <ProfileStat value={stats.daosCreated} label="DAOs created" />
+      <ProfileStat value={stats.goalsCreated} label="Goals created" />
+      <ProfileStat value={stats.ideasCreated} label="Ideas created" />
+      <ProfileStat value={stats.commentsCreated} label="Comments created" />
+      <ProfileStat value={stats.commentsReceived} label="Comments received" />
     </div>
     <div className="flex w-full gap-2">
-      <ProfileStat value={`${200.32} DOT`} label="Donations received" />
-      <ProfileStat value={`${35.5} DOT`} label="Donated" />
+      <ProfileStat value={stats.donationsReceived} label="Donations received" isCurrency />
+      <ProfileStat value={stats.donated} label="Donated" isCurrency />
     </div>
   </div>
 );

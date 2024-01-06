@@ -9,6 +9,7 @@ import Card from '../../components/components/Card';
 import Badge from '../../components/components/Badge';
 
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
+import { useRouter } from 'next/router';
 
 export default function Profile() {
   //Variables
@@ -39,6 +40,10 @@ export default function Profile() {
   const [tabIndex, setTabIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loggedUser, setLoggedUser] = useState(false);
+  const [signerAddress, setSignerAddress] = useState('');
+  const [stats, setStats] = useState({});
+
+  const router = useRouter();
 
   useEffect(() => {
     fetchContractData();
@@ -46,7 +51,8 @@ export default function Profile() {
 
   async function fetchContractData() {
     setLoading(true);
-    let user_id = Number(window.location.pathname.replace('/Profile/', ''));
+    let user_id = Number(router.query.address);
+    setSignerAddress(window.signerAddress);
     setUserid(user_id);
     if (!contract || !api) return false;
     if (user_id == window.userid) setLoggedUser(true);
@@ -184,6 +190,12 @@ export default function Profile() {
     setRepliesIdeas(MessagesIdeasURIS);
     setUserBadges(allBadges);
 
+    setStats({
+      donated,
+      daosCreated: founddao.length,
+      ideasCreated: foundidea.length
+    });
+
     setAllMessages(allMessages);
 
     setLoading(false);
@@ -226,7 +238,7 @@ export default function Profile() {
 
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-moon-32 text-piccolo">{UserInfo?.fullName?.toString()}</h1>
-              <h3 className="text-trunks">{window.signerAddress}</h3>
+              <h3 className="text-trunks">{signerAddress}</h3>
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -250,8 +262,8 @@ export default function Profile() {
       </div>
       <div className="container py-10">
         <Card className="min-h-[556px]">
-          {tabIndex === 0 && SummaryPanel()}
-          {tabIndex === 1 && BadgesPanel()}
+          {tabIndex === 0 && <SummaryPanel stats={stats} />}
+          {tabIndex === 1 && <BadgesPanel />}
         </Card>
       </div>
     </>
