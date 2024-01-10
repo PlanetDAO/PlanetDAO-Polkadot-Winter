@@ -61,12 +61,12 @@ export function Nav(): JSX.Element {
         return;
       }
     } else if (window.localStorage.getItem('login-type') === 'polkadot') {
-      const { web3Accounts } = require('@polkadot/extension-dapp');
+      const { web3Accounts,web3Enable } = require('@polkadot/extension-dapp');
       try {
         let wallet = (await web3Accounts())[0];
         if (wallet && api && userInfo) {
           const { nonce, data: balance } = await api.query.system.account(wallet.address);
-          setBalance(Number(balance.free.toString()) / 1e18 + ' MUNIT');
+          setBalance(Number(balance.free.toString()) / 1e12 + ' DOT');
           if (!isSigned) setSigned(true);
           let subbing = 10;
 

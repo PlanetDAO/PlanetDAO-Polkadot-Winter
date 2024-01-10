@@ -15,7 +15,8 @@ const AppContext = createContext({
   PolkadotLoggedIn:false,
   EasyToast:  (message,type,UpdateType = false,ToastId =  "")=>{},
   GetAllDaos:async ()=>{},
-  getUserInfoById: (userid)=>{}
+  getUserInfoById: (userid)=>{},
+  updateCurrentUser: ()=>{}
 });
 
 export function PolkadotProvider({ children }) {
@@ -61,6 +62,19 @@ export function PolkadotProvider({ children }) {
     }
   }
 
+  async function updateCurrentUser(){
+    const {web3Enable,web3Accounts, web3FromAddress} = require('@polkadot/extension-dapp');
+  
+    setPolkadotLoggedIn(true);
+    await web3Enable('PlanetDAO');
+    let wallet = (await web3Accounts())[0];
+    const injector = await web3FromAddress(wallet.address);
+
+    setUserSigner(injector.signer);
+
+    setUserWalletPolkadot(wallet.address)
+    window.signerAddress = wallet.address;
+  }
 
   useEffect(() => {
     (async function () {
@@ -77,8 +91,6 @@ export function PolkadotProvider({ children }) {
   
   
   
-        const {web3Enable,web3Accounts, web3FromAddress} = require('@polkadot/extension-dapp');
-      
         if (window.localStorage.getItem('loggedin') == "true"  ){
         
           let userid = window.localStorage.getItem('user_id');
@@ -87,17 +99,11 @@ export function PolkadotProvider({ children }) {
           setUserInfo(userInformation); 
           
           if (window.localStorage.getItem('login-type') == "polkadot"){
-            setPolkadotLoggedIn(true);
-            await web3Enable('PlanetDAO');
-            let wallet = (await web3Accounts())[0];
-            const injector = await web3FromAddress(wallet.address);
-  
-            setUserSigner(injector.signer);
-  
-            setUserWalletPolkadot(wallet.address)
-            window.signerAddress = wallet.address;
+            updateCurrentUser()
+            
           }
         }
+        console.log("Done")
       }catch(e){
 
       }
@@ -174,7 +180,7 @@ export function PolkadotProvider({ children }) {
      return (arr);
   }
 
-  return <AppContext.Provider value={{api:api,deriveAcc:deriveAcc,GetAllDaos:GetAllDaos,showToast:showToast,EasyToast:EasyToast,getUserInfoById:getUserInfoById,userWalletPolkadot:userWalletPolkadot,userSigner:userSigner,PolkadotLoggedIn:PolkadotLoggedIn, userInfo:userInfo}}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{api:api,deriveAcc:deriveAcc,updateCurrentUser:updateCurrentUser,GetAllDaos:GetAllDaos,showToast:showToast,EasyToast:EasyToast,getUserInfoById:getUserInfoById,userWalletPolkadot:userWalletPolkadot,userSigner:userSigner,PolkadotLoggedIn:PolkadotLoggedIn, userInfo:userInfo}}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

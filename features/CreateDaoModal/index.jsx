@@ -165,10 +165,18 @@ export default function CreateDaoModal({ open, onClose }) {
 
     toast.update(id, { render: 'Creating Dao...', isLoading: true });
 
+    async function onSuccess(){
+      setCreating(false);
+        onClose({ success: true });
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+    }
     if (PolkadotLoggedIn) {
       await api._extrinsics.daos.createDao(userWalletPolkadot, JSON.stringify(createdObject), formatted_template).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
         showToast(status, id, 'Created Successfully!', onClose);
       });
+      onSuccess();
     } else {
       try {
         // Creating Dao in Smart contract from metamask chain
@@ -183,11 +191,7 @@ export default function CreateDaoModal({ open, onClose }) {
           draggable: true
         });
 
-        setCreating(false);
-        onClose({ success: true });
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        onSuccess();
       } catch (error) {
         console.error(error);
         setCreating(false);

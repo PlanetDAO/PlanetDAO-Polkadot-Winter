@@ -191,7 +191,15 @@ export function getChain(chainid) {
 	}
 	return chains.allchains[0];
 }
-
+export function getChainByToken(token) {
+	for (let i = 0; i < chains.allchains.length; i++) {
+		const element = chains.allchains[i]
+		if (element.nativeCurrency.symbol === token) {
+			return element
+		}
+	}
+	return chains.allchains[0];
+}
 export function formatTemplate(template, changings) {
 
 
