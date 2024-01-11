@@ -17,6 +17,7 @@ const AppContext = createContext({
   GetAllDaos: async () => { },
   GetAllJoined: async () => { },
   GetAllGoals: async () => { },
+  GetAllFeeds:async ()=>{},
   getUserInfoById: async (userid) => { },
   updateCurrentUser: () => { }
 });
@@ -335,7 +336,64 @@ export function PolkadotProvider({ children }) {
     arr = arr.concat(await fetchContractGoalData());
     return arr;
   }
-  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals, updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
+
+
+  
+  async function fetchPolkadotFeedsData() {
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalFeedsCount = Number(await api._query.feeds.feedsIds());
+        let arr = [];
+        for (let i = 0; i < totalFeedsCount; i++) {
+          const element = await api._query.feeds.feedById(i);
+          let newElm = {
+            id: element['__internal__raw'].feedId.toString(),
+            date:  new Date(Number(element['__internal__raw'].date)* 1000),
+            type: element['__internal__raw'].feedType.toString(),
+            data: JSON.parse(element['__internal__raw'].data.toString())
+          };
+          arr.push(newElm);
+        }
+
+        return arr;
+      }
+    } catch (error) { console.error(error)}
+    return [];
+  }
+  async function fetchContractFeedsData() {
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+        const totalFeeds = await contract._feed_ids();
+
+        const arr = [];
+        for (let i = 0; i < Number(totalFeeds); i++) {
+          const feed = await contract._feeds(i);
+          let newElm = {
+            id: i,
+            date: Date(Number(feed.date)),
+            type:feed.Type,
+            data:JSON.parse( feed.data)
+          }
+          arr.push(newElm);
+        }
+
+        return arr;
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllFeeds() {
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotFeedsData());
+    arr = arr.concat(await fetchContractFeedsData());
+    return arr;
+  }
+
+
+  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals, GetAllFeeds:GetAllFeeds,updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

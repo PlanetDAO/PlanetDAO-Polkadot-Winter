@@ -9,33 +9,24 @@ import Loader from '../../components/components/Loader';
 import EmptyState from '../../components/components/EmptyState';
 import { SportDarts } from '@heathmont/moon-icons-tw';
 
-const CommunityFeed = ({ communityName }) => {
+const CommunityFeed = ({ communityName, daoId }) => {
   const [loading, setLoading] = useState(false);
   const [Items, setItems] = useState([]);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userName, setUserName] = useState('');
   const { contract } = useContract();
   const [showPostModal, setShowPostModal] = useState(false);
-  const { userInfo } = usePolkadotContext();
+  const { userInfo,GetAllFeeds } = usePolkadotContext();
 
   async function fetchContractData() {
     setLoading(true);
 
     try {
       if (contract) {
-        const totalFeeds = await contract._feed_ids();
-        const arr = [];
-
-        for (let i = 0; i < Number(totalFeeds); i++) {
-          const feed = await contract._feeds(i);
-          arr.push({
-            date: new Date(Number(feed.date) * 1000),
-            type: feed.Type,
-            data: JSON.parse(feed.data)
-          });
-        }
-
-        setItems(sortDateDesc(arr, 'date'));
+        let allFeeds = await GetAllFeeds()
+        let currentFeeds = allFeeds.filter((e)=>e.data?.daoId.toString() ==  daoId.toString())
+        
+        setItems(sortDateDesc(currentFeeds, 'date'));
 
         setLoading(false);
       }

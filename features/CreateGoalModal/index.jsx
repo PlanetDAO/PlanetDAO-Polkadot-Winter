@@ -131,10 +131,11 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
     };
     console.log('======================>Creating Goal');
     toast.update(ToastId, { render: 'Creating Goal...', isLoading: true });
-    const goalid = Number(await contract._goal_ids());
-    let feed = JSON.stringify({
+    
+    let feed = ({
       name: userInfo?.fullName,
-      goalid: goalid,
+      daoId:daoId,
+      goalid: 0,
       budget: Budget
     });
 
@@ -148,13 +149,24 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
       }, 1000);
     }
     if (PolkadotLoggedIn) {
-      await api._extrinsics.goals.createGoal(JSON.stringify(createdObject), daoId, Number(window.userid), feed).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, ToastId, 'Created Successfully!', onSuccess);
+      let goalid =  Number(await api._query.goals.goalIds());
+      feed.goalid = "p_"+goalid;
+      const txs = [
+        api._extrinsics.goals.createGoal(JSON.stringify(createdObject), daoId, Number(window.userid), JSON.stringify(feed)),
+        api._extrinsics.feeds.addFeed( JSON.stringify(feed),"goal",new Date().valueOf())
+        
+      ];
+
+      const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, ToastId, 'Created successfully!', () => { onSuccess() });
       });
     } else {
       try {
+        const goalid = Number(await contract._goal_ids());
+        feed.goalid = "m_"+goalid;
+
         // Creating Goal in Smart contract
-        await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), feed));
+        await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), JSON.stringify(feed)));
         toast.update(ToastId, {
           render: 'Created Successfully!',
           type: 'success',

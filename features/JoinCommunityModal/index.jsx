@@ -64,6 +64,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
     setisLoading(true);
     const id = toast.loading('Joining Community ...');
     let feed = JSON.stringify({
+      daoId:daoId,
       name: userInfo?.fullName?.toString()
     });
     async function onSuccess() {
@@ -81,7 +82,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
       const txs = [
         api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
         api._extrinsics.daos.joinCommunity(daoId, Number(window.userid), (new Date()).toLocaleDateString(), feed),
-        // api._extrinsics.feeds.add_Feed(, feed)
+        api._extrinsics.feeds.addFeed( feed,"join",new Date().valueOf())
         
       ];
 
