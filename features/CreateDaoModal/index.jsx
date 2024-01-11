@@ -63,13 +63,13 @@ export default function CreateDaoModal({ open, onClose }) {
 
   useEffect(() => {
     let dateTime = new Date();
-    if (!PolkadotLoggedIn) {    
+    if (!PolkadotLoggedIn) {
       setRecieveType("Polkadot")
-    }else{
+    } else {
       setRecieveType("EVM")
     }
     if (!addedDate) setStartDate(dateTime.toISOString().split('T')[0]);
-  }, []);
+  }, [PolkadotLoggedIn]);
 
   //Downloading plugin function
   function downloadURI(uri, name) {
@@ -147,6 +147,10 @@ export default function CreateDaoModal({ open, onClose }) {
           type: 'string',
           description: 'Dao'
         },
+        Created_Date: {
+          type: 'string',
+          description: (new Date()).toLocaleDateString()
+        },
         allFiles
       }
     };
@@ -168,12 +172,12 @@ export default function CreateDaoModal({ open, onClose }) {
 
     toast.update(id, { render: 'Creating Dao...', isLoading: true });
 
-    async function onSuccess(){
+    async function onSuccess() {
       setCreating(false);
-        onClose({ success: true });
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+      onClose({ success: true });
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
     if (PolkadotLoggedIn) {
       await api._extrinsics.daos.createDao(userWalletPolkadot, JSON.stringify(createdObject), formatted_template).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
@@ -183,7 +187,7 @@ export default function CreateDaoModal({ open, onClose }) {
       try {
         // Creating Dao in Smart contract from metamask chain
         await sendTransaction(await window.contract.populateTransaction.create_dao(window.signerAddress, JSON.stringify(createdObject), formatted_template, Number(window.userid)));
-        toast.update(id, {
+        await toast.update(id, {
           render: 'Created Successfully!',
           type: 'success',
           isLoading: false,

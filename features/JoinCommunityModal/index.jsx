@@ -77,7 +77,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
         render: 'Purchasing Subscription....',
         type: 'pending'
       });
-      let recipient = recievetype == "Polkadot"? recieveWallet:address;
+      let recipient = recieveWallet == ""? address:recieveWallet;
       const transfer = api.tx.balances.transferAllowDeath(recipient, `${Amount*1e12}`).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
         showToast(status, id, 'Purchased Subscription successfully!', async()=>{
           toast.update(id, {

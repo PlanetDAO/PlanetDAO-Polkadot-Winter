@@ -7,7 +7,7 @@ import useEnvironment from '../../services/useEnvironment';
 
 const options = [{ id: 'most_donations_received', label: 'Received donations' }];
 
-export const TopCommunityMembers = ({ daoid }) => {
+export const TopCommunityMembers = ({ daoId }) => {
   const [selectedOption, setSelectedOption] = useState(options[0]);
   const { getUserInfoById } = usePolkadotContext();
   const [items, setItems] = useState([]);
@@ -27,7 +27,7 @@ export const TopCommunityMembers = ({ daoid }) => {
         for (let i = 0; i < Number(totalDonations); i++) {
           const donated = await contract._donations(i);
           let dao_id_of_donated = await contract.get_dao_id_by_ideas_id(Number(donated.ideas_id));
-          if (dao_id_of_donated == daoid) {
+          if (dao_id_of_donated == daoId) {
             let foundUserDonated = alldonations.findIndex((item, idx) => item.userid == Number(donated.userid));
             if (foundUserDonated == -1) {
               let user_info = await getUserInfoById(Number(donated.userid));

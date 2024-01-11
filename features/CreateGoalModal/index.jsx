@@ -17,8 +17,8 @@ let addedDate = false;
 export default function CreateGoalModal({ open, onClose, daoId }) {
   const [GoalImage, setGoalImage] = useState([]);
   const [creating, setCreating] = useState(false);
-  const { signerAddress, sendTransaction } = useContract();
-  const { userInfo } = usePolkadotContext();
+  const {  sendTransaction } = useContract();
+  const { api, userInfo,showToast, userWalletPolkadot, userSigner, PolkadotLoggedIn } = usePolkadotContext();
 
   //Storage API for images and videos
   const NFT_STORAGE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDJDMDBFOGEzZEEwNzA5ZkI5MUQ1MDVmNDVGNUUwY0Q4YUYyRTMwN0MiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1NDQ3MTgxOTY2NSwibmFtZSI6IlplbmNvbiJ9.6znEiSkiLKZX-a9q-CKvr4x7HS675EDdaXP622VmYs8';
@@ -120,7 +120,7 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
         },
         wallet: {
           type: 'string',
-          description: signerAddress
+          description: window.signerAddress
         },
         logo: {
           type: 'string',
@@ -138,29 +138,41 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
       budget: Budget
     });
 
-    try {
-      // Creating Goal in Smart contract
-      await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), feed));
-      toast.update(ToastId, {
-        render: 'Created Successfully!',
-        type: 'success',
-        isLoading: false,
-        autoClose: 1000,
-        closeButton: true,
-        closeOnClick: true,
-        draggable: true
-      });
 
+
+    async function onSuccess() {
       setCreating(false);
       onClose({ success: true });
-    } catch (error) {
-      setCreating(false);
-      console.error(error);
-
-      return;
-      // window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
-    window.location.reload(); //After the success it will redirect the user to dao page
+    if (PolkadotLoggedIn) {
+      await api._extrinsics.goals.createGoal(JSON.stringify(createdObject), daoId, Number(window.userid), feed).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, ToastId, 'Created Successfully!', onSuccess);
+      });
+    } else {
+      try {
+        // Creating Goal in Smart contract
+        await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), feed));
+        toast.update(ToastId, {
+          render: 'Created Successfully!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 1000,
+          closeButton: true,
+          closeOnClick: true,
+          draggable: true
+        });
+
+
+      } catch (error) {
+        setCreating(false);
+        console.error(error);
+
+        return;        
+      }
+    }
   }
 
   function FilehandleChange(goal) {

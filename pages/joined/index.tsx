@@ -36,7 +36,7 @@ export const Joined = () => {
         const arrList = [];
       
         allJoined.forEach((joined_dao)=>{
-          let foundDao = (allDaos as any).filter((e) => (e?.daoId) == (joined_dao.daoid.toString()));
+          let foundDao = (allDaos as any).filter((e) => (e?.daoId) == (joined_dao.daoId.toString()));
           if (joined_dao.user_id.toString() == window.userid.toString() && foundDao.length > 0) {
             arrList.push(foundDao[0]);
           }

@@ -17,7 +17,7 @@ import useEnvironment from '../../../../../services/useEnvironment';
 export default function Goal() {
   //Variables
   const [list, setList] = useState([]);
-  const { api, showToast, getUserInfoById, GetAllDaos, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, showToast,GetAllJoined, getUserInfoById, GetAllDaos,GetAllGoals, PolkadotLoggedIn } = usePolkadotContext();
   const [GoalURI, setGoalURI] = useState({
     goalId: '',
     Title: '',
@@ -36,7 +36,10 @@ export default function Goal() {
   const [loading, setLoading] = useState(true);
   const [isJoined, setIsJoined] = useState(false);
   const [currency, setCurrency] = useState('');
-
+  const [goalIdTxt, setGoalTxtID] = useState('');
+  const [goalType, setGoalType] = useState('polkadot');
+  const [GoalDAOURI, setGoalDAOURI] = useState({});
+ 
   const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
   const [DonatemodalShow, setDonateModalShow] = useState(false);
   const [selectedIdeasId, setSelectedIdeasId] = useState(-1);
@@ -48,76 +51,89 @@ export default function Goal() {
 
   useEffect(() => {
     setCurrency(useEnvironment.getCurrency());
-    setGoalID(router.query.goalId);
-    id = router.query.goalId;
-
+    getGoalID();
     fetchContractData();
-  }, [contract, api]);
+  }, [ api, router]);
+
+
+  function getGoalID() {
+    const goalIdParam = router.query.goalId;
+   
+    if (!goalIdParam) {
+      return;
+    }
+
+    const split = goalIdParam.split('_');
+    const type = goalIdParam.startsWith('m_') ? 'metamask' : 'polkadot';
+    const id = split[1];
+
+    setGoalType(type);
+    setGoalID(Number(id));
+    setGoalTxtID(goalIdParam);
+  }
+
 
   async function fetchContractData() {
     setLoading(true);
 
     try {
-      if (contract && id && api) {
-        setGoalID(Number(id));
+      if ( goalId != -1 && api) {
 
-        const goalURIFull = await contract._goal_uris(Number(id)); //Getting total goal (Number)
-        const goalURI = JSON.parse(goalURIFull.goal_uri);
+        let allGoals =await GetAllGoals();
+        let goalURIFull = (allGoals).filter((e) => (e?.goalId) == (goalIdTxt.toString()))[0];
+
+
         let allDaos = await GetAllDaos();
-        let goalDAO = allDaos.filter((e) => (e.daoId = goalURIFull.dao_id))[0];
+        let goalDAO = allDaos.filter((e) => (e.daoId == goalURIFull.daoId))[0];
+        setGoalDAOURI(goalDAO);
 
-        let user_info = await getUserInfoById(Number(goalURI.properties?.user_id?.description));
-        let isJoined = await contract.is_person_joined(Number(goalDAO.id), Number(window.userid));
-        setIsJoined(isJoined);
-
-        const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(id)); //Getting total goal (Number)
-        let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
-        const arr = [];
-        let total_donated = 0;
-        for (let i = 0; i < Object.keys(totalIdeas).length; i++) {
-          //total goal number Iteration
-          const ideasId = await contract.get_ideas_id_by_ideas_uri(totalIdeas[i]);
-          const AllvotesWithEmpty = await contract.get_ideas_votes_from_goal(Number(id), Number(id)); //Getting all votes
-          const Allvotes = AllvotesWithEmpty.filter((item, idx) => item !== '');
-          let isvoted = false;
-          for (let i = 0; i < Allvotes.length; i++) {
-            const element = Number(Allvotes[i]);
-            if (element == Number(window.userid)) isvoted = true;
-          }
-          if (totalIdeas[i] == '') continue;
-          const object = JSON.parse(totalIdeas[i]);
-          if (object) {
-            let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
-            total_donated += donation;
-            arr.push({
-              //Pushing all data into array
-              ideasId: Number(ideasId),
-              Title: object.properties.Title.description,
-              Description: object.properties.Description.description,
-              wallet: object.properties.wallet.description,
-              donation: donation,
-              votes: Object.keys(Allvotes).length,
-              logo: object.properties.logo.description?.url,
-              allfiles: object.properties.allfiles,
-              isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
-              isVoted: isvoted
-            });
-          }
+        let user_info = await getUserInfoById(Number(goalURIFull.UserId));
+        let allJoined = await GetAllJoined();
+        let currentJoined =  (allJoined).filter((e) => (e?.daoId) == (goalURIFull.daoId.toString()))
+        let joinedInfo = currentJoined.filter((e)=>e?.user_id.toString() == window.userid.toString() )
+        if (joinedInfo.length > 0) {
+           setIsJoined(true);
+        }else{
+          setIsJoined(false);
         }
+
+
+        // const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(id)); //Getting total goal (Number)
+        // let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
+        const arr = [];
+        // let total_donated = 0;
+        // for (let i = 0; i < Object.keys(totalIdeas).length; i++) {
+        //   //total goal number Iteration
+        //   const ideasId = await contract.get_ideas_id_by_ideas_uri(totalIdeas[i]);
+        //   const AllvotesWithEmpty = await contract.get_ideas_votes_from_goal(Number(id), Number(id)); //Getting all votes
+        //   const Allvotes = AllvotesWithEmpty.filter((item, idx) => item !== '');
+        //   let isvoted = false;
+        //   for (let i = 0; i < Allvotes.length; i++) {
+        //     const element = Number(Allvotes[i]);
+        //     if (element == Number(window.userid)) isvoted = true;
+        //   }
+        //   if (totalIdeas[i] == '') continue;
+        //   const object = JSON.parse(totalIdeas[i]);
+        //   if (object) {
+        //     let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
+        //     total_donated += donation;
+        //     arr.push({
+        //       //Pushing all data into array
+        //       ideasId: Number(ideasId),
+        //       Title: object.properties.Title.description,
+        //       Description: object.properties.Description.description,
+        //       wallet: object.properties.wallet.description,
+        //       donation: donation,
+        //       votes: Object.keys(Allvotes).length,
+        //       logo: object.properties.logo.description?.url,
+        //       allfiles: object.properties.allfiles,
+        //       isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
+        //       isVoted: isvoted
+        //     });
+        //   }
+        // }
         setList(arr);
-        setGoalURI({
-          goalId: Number(id),
-          Title: goalURI.properties.Title.description,
-          Description: goalURI.properties.Description.description,
-          Budget: goalURI.properties.Budget.description,
-          End_Date: goalURI.properties.End_Date?.description,
-          wallet: goalURI.properties.wallet.description,
-          logo: goalURI.properties.logo.description?.url,
-          total_donated: total_donated,
-          Dao: goalDAO,
-          user_info: user_info,
-          isOwner: goalURI.properties.user_id.description == Number(window.userid) ? true : false
-        });
+        setGoalURI(goalURIFull);
 
         setLoading(false);
 
@@ -180,7 +196,7 @@ export default function Goal() {
                 element={
                   <h5 className="font-semibold">
                     <Link className="text-piccolo" href={`../../${router.query.daoId}`}>
-                      {GoalURI?.Dao?.Title}
+                      {GoalDAOURI?.Title}
                     </Link>{' '}
                     &gt; Goals
                   </h5>

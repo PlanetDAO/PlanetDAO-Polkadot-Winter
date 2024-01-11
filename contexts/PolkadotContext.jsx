@@ -8,16 +8,17 @@ import { toast } from 'react-toastify';
 const AppContext = createContext({
   api: null,
   deriveAcc: null,
-  showToast: (status, id, FinalizedText, doAfter, callToastSuccess = true, events) => {},
+  showToast: (status, id, FinalizedText, doAfter, callToastSuccess = true, events) => { },
   userInfo: {},
   userWalletPolkadot: '',
   userSigner: null,
   PolkadotLoggedIn: false,
-  EasyToast: (message, type, UpdateType = false, ToastId = '') => {},
-  GetAllDaos: async () => {},
-  GetAllJoined: async () => {},
-  getUserInfoById: async (userid) => {},
-  updateCurrentUser: () => {}
+  EasyToast: (message, type, UpdateType = false, ToastId = '') => { },
+  GetAllDaos: async () => { },
+  GetAllJoined: async () => { },
+  GetAllGoals: async () => { },
+  getUserInfoById: async (userid) => { },
+  updateCurrentUser: () => { }
 });
 
 export function PolkadotProvider({ children }) {
@@ -105,7 +106,7 @@ export function PolkadotProvider({ children }) {
           }
         }
         console.log('Done');
-      } catch (e) {}
+      } catch (e) { }
     })();
   }, []);
 
@@ -114,10 +115,9 @@ export function PolkadotProvider({ children }) {
     for (let i = 0; i < totalDAOCount; i++) {
       let object = '';
       let recievewallet = '';
-      if (prefix == '_m') {
+      if (prefix == 'm_') {
         object = JSON.parse(allDAOs[i]);
       } else {
-        console.log('gah', allDAOs[i]);
         if (allDAOs[i]?.daoUri) {
           object = JSON.parse(allDAOs[i].daoUri?.toString());
           recievewallet = allDAOs[i].daoWallet?.toString();
@@ -137,8 +137,9 @@ export function PolkadotProvider({ children }) {
           logo: object.properties.logo.description?.url,
           wallet: object.properties.wallet.description,
           recievewallet: recievewallet,
-          recievetype: prefix == '_m' ? 'Polkadot' : 'EVM',
-          SubsPrice: object.properties?.SubsPrice?.description
+          recievetype: prefix == 'm_' ? 'Polkadot' : 'EVM',
+          SubsPrice: object.properties?.SubsPrice?.description,
+          Created_Date: object.properties?.Created_Date?.description,
         });
       }
     }
@@ -164,7 +165,7 @@ export function PolkadotProvider({ children }) {
         let arr = InsertData(totalDAOCount, await totalDao(), 'p_');
         return arr;
       }
-    } catch (error) {}
+    } catch (error) { }
     return [];
   }
   async function fetchContractDAOData() {
@@ -176,7 +177,7 @@ export function PolkadotProvider({ children }) {
         let arr = InsertData(totalDAOCount, totalDao, 'm_');
         return arr;
       }
-    } catch (error) {}
+    } catch (error) { }
 
     return [];
   }
@@ -197,15 +198,29 @@ export function PolkadotProvider({ children }) {
           const element = await api._query.daos.joinedById(i);
           let newElm = {
             id: element['__internal__raw'].id.toString(),
-            daoid: element['__internal__raw'].daoid.toString(),
+            daoId: element['__internal__raw'].daoid.toString(),
             user_id: element['__internal__raw'].userId.toString(),
             joined_date: element['__internal__raw'].joinedDate.toString()
           };
           arr.push(newElm);
         }
+        //All DAOs Users
+        let allDaos = await GetAllDaos();
+        for (let i = 0; i < allDaos.length; i++) {
+          const element = allDaos[i];
+          let newElm = {
+            id: element.daoId,
+            daoId: element.daoId,
+            user_id: element.user_id,
+            joined_date: element.Created_Date
+          };
+          arr.push(newElm);
+        }
+
+
         return arr;
       }
-    } catch (error) {}
+    } catch (error) { console.error(error)}
     return [];
   }
   async function fetchContractJoinedData() {
@@ -222,7 +237,7 @@ export function PolkadotProvider({ children }) {
 
         return arr;
       }
-    } catch (error) {}
+    } catch (error) { }
 
     return [];
   }
@@ -233,7 +248,94 @@ export function PolkadotProvider({ children }) {
     return arr;
   }
 
-  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc, updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
+
+  async function InsertGoalData(totalGoalCount, allGoals, prefix) {
+    const arr = [];
+    for (let i = 0; i < totalGoalCount; i++) {
+      let object = '';
+      let daoId = "";
+      if (prefix == 'm_') {
+        object = JSON.parse(allGoals[i].goal_uri);
+        daoId = allGoals[i].dao_id;
+      } else {
+        if (allGoals[i]?.goalUri) {
+          object = JSON.parse(allGoals[i].goalUri?.toString());
+          daoId = allGoals[i].daoId.toString();
+        }
+      }
+
+      if (object) {
+        arr.push({
+          //Pushing all data into array
+          id: i,
+          goalId: prefix + i,
+          daoId: daoId,
+          Title: object.properties.Title.description,
+          Description: object.properties.Description.description,
+          Budget: object.properties.Budget.description,
+          End_Date: object.properties.End_Date.description,
+          wallet: object.properties.wallet.description,
+          UserId: object.properties?.user_id?.description,
+          logo: object.properties.logo.description?.url,
+          type: prefix == 'm_' ? 'Polkadot' : 'EVM',
+          ideasCount: 0,
+          reached: 0,
+        });
+      }
+    }
+    return arr;
+  }
+  async function fetchPolkadotGoalData() {
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalGoalCount = Number(await api._query.goals.goalIds());
+
+        let totalGoal = async () => {
+          let arr = [];
+          for (let i = 0; i < totalGoalCount; i++) {
+            const element = await api._query.goals.goalById(i);
+            let goalURI = element['__internal__raw'];
+
+            arr.push(goalURI);
+          }
+          return arr;
+        };
+
+        let arr = InsertGoalData(totalGoalCount, await totalGoal(), 'p_');
+        return arr;
+      }
+    } catch (error) { }
+    return [];
+  }
+  async function fetchContractGoalData() {
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+        const totalGoalCount = Number(await contract._goal_ids());
+        let totalGoal = async () => {
+          const arr = [];
+          for (let i = 0; i < Number(totalGoalCount); i++) {
+            const goal_info = await contract._goal_uris(i);
+            arr.push(goal_info);
+          }
+          return arr;
+        }
+        let arr = InsertGoalData(totalGoalCount, await totalGoal(), 'm_');
+        return arr;
+
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllGoals() {
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotGoalData());
+    arr = arr.concat(await fetchContractGoalData());
+    return arr;
+  }
+  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals, updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

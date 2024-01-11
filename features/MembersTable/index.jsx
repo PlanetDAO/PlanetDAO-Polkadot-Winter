@@ -16,7 +16,7 @@ const mockData = [
 
 const HeaderLabel = ({ children }) => <label className="flex items-center h-full">{children}</label>;
 
-const MembersTable = ({ daoId }) => {
+const MembersTable = ({ allJoined }) => {
   const { api, GetAllJoined, getUserInfoById } = usePolkadotContext();
   const [Data, setData] = useState([]);
   const [currency, setCurrency] = useState('');
@@ -92,7 +92,6 @@ const MembersTable = ({ daoId }) => {
 
   async function loadData() {
     if (api) {
-      let allJoined = await GetAllJoined();
       let Members = [];
       for (let i = 0; i < allJoined.length; i++) {
         const element = allJoined[i];
