@@ -10,9 +10,10 @@ import useContract from '../../services/useContract';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { Dao } from '../../data-model/dao';
 import { useRouter } from 'next/router';
+import { JOINED } from '../../data-model/joined';
 declare let window;
 export const Joined = () => {
-  const { api, GetAllDaos } = usePolkadotContext();
+  const { api, GetAllDaos,GetAllJoined } = usePolkadotContext();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDaoModal, setShowCreateDaoModal] = useState(false);
@@ -30,18 +31,17 @@ export const Joined = () => {
     try {
       if (contract && api) {
         let allDaos = (await GetAllDaos()) as any as Dao[];
-
-        const totalJoined = await contract._join_ids();
-
+        let allJoined  = (await GetAllJoined()) as any  as JOINED[];
+  
         const arrList = [];
-        for (let i = 0; i < Number(totalJoined); i++) {
-          const joined_dao = await contract._joined_person(i);
-          let foundDao = (allDaos as any).filter((e) => Number(e?.id) == Number(joined_dao.daoid));
-          if (joined_dao.user_id == Number(window.userid) && foundDao.length > 0) {
+      
+        allJoined.forEach((joined_dao)=>{
+          let foundDao = (allDaos as any).filter((e) => (e?.daoId) == (joined_dao.daoid.toString()));
+          if (joined_dao.user_id.toString() == window.userid.toString() && foundDao.length > 0) {
             arrList.push(foundDao[0]);
           }
-        }
-
+        })
+       
         allDaos.forEach((dao) => {
           if (Number(dao.user_id) === Number(window.userid)) {
             arrList.push(dao);

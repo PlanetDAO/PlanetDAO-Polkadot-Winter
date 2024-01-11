@@ -17,6 +17,7 @@ let addedDate = false;
 export default function CreateDaoModal({ open, onClose }) {
   const [DaoImage, setDaoImage] = useState([]);
   const [creating, setCreating] = useState(false);
+  const [RecieveType, setRecieveType] = useState("EVM");
 
   const { api, showToast, userWalletPolkadot, userSigner, PolkadotLoggedIn } = usePolkadotContext();
   const { contract, sendTransaction, formatTemplate, signerAddress } = useContract();
@@ -49,7 +50,7 @@ export default function CreateDaoModal({ open, onClose }) {
   const [RecieveWallet, RecieveWalletInput, setRecieveWallet] = UseFormInput({
     defaultValue: '',
     type: 'text',
-    placeholder: 'Wallet Address (EVM)',
+    placeholder: `Wallet Address (${RecieveType})`,
     id: 'recipient'
   });
 
@@ -62,8 +63,10 @@ export default function CreateDaoModal({ open, onClose }) {
 
   useEffect(() => {
     let dateTime = new Date();
-    if (!PolkadotLoggedIn) {
-      setRecieveWallet(signerAddress);
+    if (!PolkadotLoggedIn) {    
+      setRecieveType("Polkadot")
+    }else{
+      setRecieveType("EVM")
     }
     if (!addedDate) setStartDate(dateTime.toISOString().split('T')[0]);
   }, []);
@@ -174,9 +177,8 @@ export default function CreateDaoModal({ open, onClose }) {
     }
     if (PolkadotLoggedIn) {
       await api._extrinsics.daos.createDao(userWalletPolkadot, JSON.stringify(createdObject), formatted_template).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, id, 'Created Successfully!', onClose);
+        showToast(status, id, 'Created Successfully!', onSuccess);
       });
-      onSuccess();
     } else {
       try {
         // Creating Dao in Smart contract from metamask chain

@@ -63,6 +63,7 @@ contract PlanetDAO {
   struct join_struct {
     uint256 daoid;
     uint256 user_id;
+    string joined_date;
   }
 
   struct user_badge_struct {
@@ -254,15 +255,15 @@ contract PlanetDAO {
     _donations_ids++;
   }
 
-  function join_community(uint256 dao_id, uint256 person, string memory _feed) public {
+  function join_community(uint256 dao_id, uint256 person,string memory joined_date, string memory _feed) public {
     _user_badges[person].joined = true;
-    _joined_person[_join_ids] = join_struct({daoid: dao_id, user_id: person});
+    _joined_person[_join_ids] = join_struct({daoid: dao_id, user_id: person,joined_date:joined_date});
     _join_ids++;
     add_Feed(_feed, 'join');
   }
 
   function leave_community(uint256 join_id) public {
-    _joined_person[join_id] = join_struct({daoid: 9999, user_id: 9999});
+    _joined_person[join_id] = join_struct({daoid: 9999, user_id: 9999,joined_date:""});
   }
 
   function is_person_joined(uint256 dao_id, uint256 person) public view returns (bool) {

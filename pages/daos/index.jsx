@@ -11,7 +11,7 @@ import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import JoinCommunityModal from '../../features/JoinCommunityModal';
 
 export default function DAOs() {
-  const { api, GetAllDaos } = usePolkadotContext();
+  const { api, GetAllDaos, GetAllJoined } = usePolkadotContext();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDaoModal, setShowCreateDaoModal] = useState(false);
@@ -29,17 +29,17 @@ export default function DAOs() {
     if (contract && api) {
       setLoading(true);
       let allDaos = await GetAllDaos();
+      let allJoined = await GetAllJoined();
 
-      const totalJoined = await contract._join_ids();
       const joinedDaosList = [];
 
-      for (let i = 0; i < Number(totalJoined); i++) {
-        const joined_dao = await contract._joined_person(i);
-        let foundDao = allDaos.filter((e) => Number(e?.id) == Number(joined_dao.daoid));
-        if (joined_dao.user_id == Number(window.userid) && foundDao.length > 0) {
+      allJoined.forEach((joined_dao) => {
+        let foundDao = (allDaos).filter((e) => (e?.daoId) == (joined_dao.daoid.toString()));
+        if (joined_dao.user_id.toString() == window.userid.toString() && foundDao.length > 0) {
           joinedDaosList.push(foundDao[0]);
         }
-      }
+
+      })
 
       allDaos.forEach((dao) => {
         if (Number(dao.user_id) === Number(window.userid)) {
@@ -102,7 +102,7 @@ export default function DAOs() {
       </div>
 
       <CreateDaoModal open={showCreateDaoModal} onClose={closeModal} />
-      <JoinCommunityModal SubsPrice={communityToJoin.SubsPrice} show={showJoinModal} onHide={closeJoinCommunityModal} address={communityToJoin.wallet} title={communityToJoin.Title} daoId={communityToJoin.daoId} />
+      <JoinCommunityModal SubsPrice={communityToJoin.SubsPrice} show={showJoinModal} onHide={closeJoinCommunityModal} address={communityToJoin.wallet} recieveWallet={communityToJoin.recievewallet}  recievetype={communityToJoin.recievetype} title={communityToJoin.Title} daoId={communityToJoin.daoId} />
     </>
   );
 }

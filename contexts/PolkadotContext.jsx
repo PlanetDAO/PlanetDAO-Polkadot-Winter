@@ -7,16 +7,17 @@ import { toast } from 'react-toastify';
 
 const AppContext = createContext({
   api: null,
-  deriveAcc:null,
-  showToast:(status,id,FinalizedText,doAfter,callToastSuccess= true, events)=>{},
-  userInfo:{},
+  deriveAcc: null,
+  showToast: (status, id, FinalizedText, doAfter, callToastSuccess = true, events) => { },
+  userInfo: {},
   userWalletPolkadot: "",
-  userSigner:null,
-  PolkadotLoggedIn:false,
-  EasyToast:  (message,type,UpdateType = false,ToastId =  "")=>{},
-  GetAllDaos:async ()=>{},
-  getUserInfoById: (userid)=>{},
-  updateCurrentUser: ()=>{}
+  userSigner: null,
+  PolkadotLoggedIn: false,
+  EasyToast: (message, type, UpdateType = false, ToastId = "") => { },
+  GetAllDaos: async () => { },
+  GetAllJoined: async () => { },
+  getUserInfoById: async(userid) => { },
+  updateCurrentUser: () => { }
 });
 
 export function PolkadotProvider({ children }) {
@@ -27,31 +28,33 @@ export function PolkadotProvider({ children }) {
   const [userWalletPolkadot, setUserWalletPolkadot] = useState("")
   const [userSigner, setUserSigner] = useState("")
 
-  async function showToast(status,id,FinalizedText,doAfter,callToastSuccess= true, events){
- 
-   if (status.isInBlock) {
+  async function showToast(status, id, FinalizedText, doAfter, callToastSuccess = true, events) {
+
+    if (status.isInBlock) {
       toast.update(id, { render: "Transaction In block...", isLoading: true });
 
-    }else if (status.isFinalized) {
+    } else if (status.isFinalized) {
       if (callToastSuccess)
-      toast.update(id, { render: FinalizedText, type: "success", isLoading: false,  autoClose: 1000,
-      closeButton: true,
-      closeOnClick: true,
-      draggable: true });
+        toast.update(id, {
+          render: FinalizedText, type: "success", isLoading: false, autoClose: 1000,
+          closeButton: true,
+          closeOnClick: true,
+          draggable: true
+        });
       doAfter(events);
     }
   }
 
-  async function getUserInfoById(userid){
-    if (api){
+  async function getUserInfoById(userid) {
+    if (api) {
       return await api.query.users.userById(userid);
-    }else{
+    } else {
       return {};
     }
   }
-  async function EasyToast(message,type,UpdateType = false,ToastId = ""){
+  async function EasyToast(message, type, UpdateType = false, ToastId = "") {
 
-    if (UpdateType){
+    if (UpdateType) {
       toast.update(ToastId, {
         render: message, type: type, isLoading: false,
         autoClose: 1000,
@@ -62,9 +65,9 @@ export function PolkadotProvider({ children }) {
     }
   }
 
-  async function updateCurrentUser(){
-    const {web3Enable,web3Accounts, web3FromAddress} = require('@polkadot/extension-dapp');
-  
+  async function updateCurrentUser() {
+    const { web3Enable, web3Accounts, web3FromAddress } = require('@polkadot/extension-dapp');
+
     setPolkadotLoggedIn(true);
     await web3Enable('PlanetDAO');
     let wallet = (await web3Accounts())[0];
@@ -78,50 +81,56 @@ export function PolkadotProvider({ children }) {
 
   useEffect(() => {
     (async function () {
-      try{
+      try {
         const wsProvider = new WsProvider(polkadotConfig.chain_rpc);
         const _api = await ApiPromise.create({ provider: wsProvider });
         await _api.isReady;
-  
+
         setApi(_api);
-  
+
         const keyring = new Keyring({ type: 'sr25519' });
         const newPair = keyring.addFromUri(polkadotConfig.derive_acc);
         setDeriveAcc(newPair)
-  
-  
-  
-        if (window.localStorage.getItem('loggedin') == "true"  ){
-        
+
+
+
+        if (window.localStorage.getItem('loggedin') == "true") {
+
           let userid = window.localStorage.getItem('user_id');
           window.userid = userid;
           const userInformation = await _api.query.users.userById(userid);
-          setUserInfo(userInformation); 
-          
-          if (window.localStorage.getItem('login-type') == "polkadot"){
+          setUserInfo(userInformation);
+
+          if (window.localStorage.getItem('login-type') == "polkadot") {
             updateCurrentUser()
-            
+
           }
         }
         console.log("Done")
-      }catch(e){
+      } catch (e) {
 
       }
-     
+
     })();
-  },[])
+  }, [])
 
   async function InsertData(totalDAOCount, allDAOs, prefix) {
     const arr = [];
     for (let i = 0; i < totalDAOCount; i++) {
-      //total dao number Iteration
-      const object = JSON.parse(allDAOs[i]);
+      let object = "";
+      let recievewallet = "";
+      if (prefix == "_m") {
+        object = JSON.parse(allDAOs[i]);
+      } else {
+        object = JSON.parse(allDAOs[i].daoUri.toString());
+        recievewallet= allDAOs[i].daoWallet.toString();
+      }
 
       if (object) {
         let user_info = await getUserInfoById(object.properties?.user_id?.description)
         arr.push({
           //Pushing all data into array
-          id : i,
+          id: i,
           daoId: prefix + i,
           Title: object.properties.Title.description,
           Start_Date: object.properties.Start_Date.description,
@@ -129,6 +138,8 @@ export function PolkadotProvider({ children }) {
           user_id: object.properties?.user_id?.description,
           logo: object.properties.logo.description?.url,
           wallet: object.properties.wallet.description,
+          recievewallet: recievewallet,
+          recievetype: prefix == "_m"?"Polkadot":"EVM",
           SubsPrice: object.properties?.SubsPrice?.description
         });
       }
@@ -136,8 +147,8 @@ export function PolkadotProvider({ children }) {
     return arr;
   }
 
-  async function fetchPolkadotData() {
-   
+  async function fetchPolkadotDAOData() {
+
     //Fetching data from Parachain
     try {
       if (api) {
@@ -146,7 +157,7 @@ export function PolkadotProvider({ children }) {
           let arr = [];
           for (let i = 0; i < totalDAOCount; i++) {
             const element = await api._query.daos.daoById(i);
-            let daoURI = element['__internal__raw'].daoUri.toString();
+            let daoURI = element['__internal__raw'];
 
             arr.push(daoURI);
           }
@@ -159,8 +170,8 @@ export function PolkadotProvider({ children }) {
     } catch (error) { }
     return [];
   }
-  async function fetchContractData() {
-   
+  async function fetchContractDAOData() {
+
     //Fetching data from Smart contract
     try {
       if (window.contract) {
@@ -173,14 +184,69 @@ export function PolkadotProvider({ children }) {
 
     return [];
   }
-  async function GetAllDaos(){
+  async function GetAllDaos() {
     let arr = [];
-    arr= arr.concat(await fetchPolkadotData());
-    arr= arr.concat(await fetchContractData());
-     return (arr);
+    arr = arr.concat(await fetchPolkadotDAOData());
+    arr = arr.concat(await fetchContractDAOData());
+    return (arr);
   }
 
-  return <AppContext.Provider value={{api:api,deriveAcc:deriveAcc,updateCurrentUser:updateCurrentUser,GetAllDaos:GetAllDaos,showToast:showToast,EasyToast:EasyToast,getUserInfoById:getUserInfoById,userWalletPolkadot:userWalletPolkadot,userSigner:userSigner,PolkadotLoggedIn:PolkadotLoggedIn, userInfo:userInfo}}>{children}</AppContext.Provider>;
+
+  async function fetchPolkadotJoinedData() {
+
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalJoinedCount = Number(await api._query.daos.joinedIds());
+        let arr = [];
+        for (let i = 0; i < totalJoinedCount; i++) {
+
+          const element = await api._query.daos.joinedById(i);
+          let newElm = {
+            id: element['__internal__raw'].id.toString(),
+            daoid: element['__internal__raw'].daoid.toString(),
+            user_id: element['__internal__raw'].userId.toString(),
+            joined_date: element['__internal__raw'].joinedDate.toString(),
+          };
+          arr.push(newElm);
+        }
+        return arr;
+      }
+    } catch (error) { }
+    return [];
+  }
+  async function fetchContractJoinedData() {
+
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+
+        const totalJoined = await contract._join_ids();
+
+        const arr = [];
+        for (let i = 0; i < Number(totalJoined); i++) {
+          const joined_dao = await contract._joined_person(i);
+          arr.push(joined_dao)
+        }
+
+
+        return arr;
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllJoined() {
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotJoinedData());
+    arr = arr.concat(await fetchContractJoinedData());
+    return (arr);
+  }
+
+
+
+
+  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc, updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

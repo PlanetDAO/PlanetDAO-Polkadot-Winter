@@ -258,7 +258,7 @@ export function UtilsProvider({ children }) {
 
       console.log('DAO_ID', dao_id);
 
-      let encodedCallData = PlanetDAOContract.join_community(dao_id, Number(window.userid), feed).encodeABI();
+      let encodedCallData = PlanetDAOContract.join_community(dao_id, Number(window.userid),new Date().toLocaleDateString(), feed).encodeABI();
 
       callData.push(encodedCallData);
 

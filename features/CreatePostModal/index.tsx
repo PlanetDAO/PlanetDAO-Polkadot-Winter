@@ -37,6 +37,7 @@ const CreatePostModal = ({ show, onClose, avatarUrl, userName, communityName }) 
               </div>
             </div>
             <Textarea placeholder="What do you want to share with the community?" className="bg-goten min-h-[88px]" value={text} onChange={(e) => setText(e.target.value)} />
+            
             <AddImageInput className="w-full !h-[200px]" onClick={uploadImage} />
           </div>
 
