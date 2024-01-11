@@ -3,10 +3,16 @@ import Card from '../Card';
 import { Button } from '@heathmont/moon-core-tw';
 import Link from 'next/link';
 import { ArrowsRightShort, SportDarts } from '@heathmont/moon-icons-tw';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import useEnvironment from '../../../services/useEnvironment';
 
 const GoalCard = ({ item, preview = false, className = '' }) => {
   const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [currency, setCurrency] = useState('');
+
+  useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
+  }, []);
 
   return (
     <Card className={`max-w-[720px] ${className}`}>
@@ -18,8 +24,12 @@ const GoalCard = ({ item, preview = false, className = '' }) => {
         <div className="flex flex-1 flex-col gap-2 relative px-5 text-moon-16">
           <p className="font-semibold text-moon-18">{item.Title}</p>
           <div>
-            <p className="font-semibold text-moon-20 text-hit">DEV {item?.reached?.toString()}</p>
-            <p>reached of DEV {item.Budget} goal</p>
+            <p className="font-semibold text-moon-20 text-hit">
+              {currency} {item?.reached?.toString()}
+            </p>
+            <p>
+              reached of {currency} {item.Budget} goal
+            </p>
           </div>
           <div>
             <p className="font-semibold text-moon-20 text-hit">{item?.ideasCount?.toString()}</p>

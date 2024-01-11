@@ -31,6 +31,7 @@ export default function DAO() {
   const [aboutTemplate, setAboutTemplate] = useState('');
   const [tabIndex, setTabIndex] = useState(0);
   const [daoType, setDaoType] = useState('metamask');
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
 
   const router = useRouter();
 
@@ -131,12 +132,16 @@ export default function DAO() {
         const daoURI = await contract.dao_uri(Number(daoId)); //Getting dao URI
         const template_html = await contract._template_uris(daoId);
 
+        await fetchJoinedCommunities();
+
         UpdateDaoData(daoURI, template_html);
       }
     }
 
     setLoading(false);
   }
+
+  async function fetchJoinedCommunities() {}
 
   async function fetchContractDataFull() {
     setLoading(true);
@@ -205,13 +210,12 @@ export default function DAO() {
         <meta name="description" content="DAO" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <div className={`flex items-center flex-col gap-8`}>
         <div className={`gap-8 flex flex-col w-full bg-gohan pt-10 border-beerus border`}>
           <div className="container flex w-full justify-between relative">
             <div className="flex flex-col gap-1">
               <h5 className="font-semibold">Community</h5>
-              <h1 className="text-moon-32 font-bold">{DaoURI.Title}</h1>
+              {DaoURI.Title}
               <h3 className="flex gap-2 whitespace-nowrap">
                 <div className="flex">
                   Managed by &nbsp;

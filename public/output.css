@@ -1077,10 +1077,6 @@ video {
   margin-top: 0.5rem;
 }
 
-.mt-20{
-  margin-top: 5rem;
-}
-
 .mt-3{
   margin-top: 0.75rem;
 }
@@ -1181,6 +1177,10 @@ video {
   height: 0.5rem;
 }
 
+.h-20{
+  height: 5rem;
+}
+
 .h-24{
   height: 6rem;
 }
@@ -1246,10 +1246,6 @@ video {
   height: 100%;
 }
 
-.h-20{
-  height: 5rem;
-}
-
 .max-h-\[18\.75rem\]{
   max-height: 18.75rem;
 }
@@ -1310,6 +1306,10 @@ video {
   width: 0.5rem;
 }
 
+.w-20{
+  width: 5rem;
+}
+
 .w-24{
   width: 6rem;
 }
@@ -1350,6 +1350,10 @@ video {
   width: 2rem;
 }
 
+.w-\[160px\]{
+  width: 160px;
+}
+
 .w-\[180px\]{
   width: 180px;
 }
@@ -1385,10 +1389,6 @@ video {
 
 .w-px{
   width: 1px;
-}
-
-.w-20{
-  width: 5rem;
 }
 
 .min-w-0{
@@ -2307,10 +2307,6 @@ video {
   padding-bottom: 1.25rem;
 }
 
-.pb-0{
-  padding-bottom: 0px;
-}
-
 .pb-1{
   padding-bottom: 0.25rem;
 }
@@ -2405,6 +2401,10 @@ video {
 
 .pt-3{
   padding-top: 0.75rem;
+}
+
+.pt-5{
+  padding-top: 1.25rem;
 }
 
 .pt-8{
@@ -3745,10 +3745,6 @@ input[type=file]::-webkit-file-upload-button{
   display: none;
 }
 
-.hover\:cursor-pointer:hover{
-  cursor: pointer;
-}
-
 .hover\:rounded-moon-i-sm:hover{
   border-radius: var(--radius-i-sm);
 }
@@ -3775,14 +3771,6 @@ input[type=file]::-webkit-file-upload-button{
 
 .hover\:bg-transparent:hover{
   background-color: transparent;
-}
-
-.hover\:bg-hit\/30:hover{
-  background-color: rgb(var(--hit) / 0.3);
-}
-
-.hover\:bg-piccolo:hover{
-  background-color: rgb(var(--piccolo));
 }
 
 .hover\:text-bulma:hover{
@@ -4223,20 +4211,12 @@ input[type=file]::-webkit-file-upload-button{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.moon-selected\:bg-hit\/30[aria-selected="true"]{
-  background-color: rgb(var(--hit) / 0.3);
-}
-
 .moon-selected\:bg-piccolo[aria-selected="true"]{
   background-color: rgb(var(--piccolo));
 }
 
 .moon-selected\:text-gohan[aria-selected="true"]{
   color: rgb(var(--gohan));
-}
-
-:where([aria-selected="true"]) .moon-selected\:bg-hit\/30{
-  background-color: rgb(var(--hit) / 0.3);
 }
 
 :where([aria-selected="true"]) .moon-selected\:bg-piccolo{

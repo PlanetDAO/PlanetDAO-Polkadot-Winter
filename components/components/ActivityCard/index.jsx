@@ -6,6 +6,7 @@ import IdeaCard from '../IdeaCard';
 import GoalCard from '../GoalCard';
 import { useEffect, useState } from 'react';
 import useContract from '../../../services/useContract';
+import useEnvironment from '../../../services/useEnvironment';
 
 const JoinActivity = ({ data }) => (
   <div className="flex gap-4 w-full items-center">
@@ -149,6 +150,7 @@ function GoalActivity({ data }) {
 
 function DonationActivity({ data }) {
   const { contract } = useContract();
+  const [currency, setCurrency] = useState('');
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
@@ -186,6 +188,8 @@ function DonationActivity({ data }) {
   }
 
   useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
+
     fetchContractData();
   }, [contract]);
 
@@ -196,7 +200,10 @@ function DonationActivity({ data }) {
           <ShopWallet className="text-moon-32" />
         </Avatar>
         <p>
-          <span className="font-bold">DEV {data.donated} donated</span> on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
+          <span className="font-bold">
+            {currency} {data.donated} donated
+          </span>{' '}
+          on an idea for the goal <span className="font-bold">{data.goalTitle}</span>
         </p>
       </div>
       <IdeaCard item={ideaURI} className="shadow-none !bg-goku border border-beerus" preview />

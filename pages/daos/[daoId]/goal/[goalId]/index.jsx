@@ -12,6 +12,7 @@ import { usePolkadotContext } from '../../../../../contexts/PolkadotContext';
 import Image from 'next/legacy/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import useEnvironment from '../../../../../services/useEnvironment';
 
 export default function Goal() {
   //Variables
@@ -34,6 +35,7 @@ export default function Goal() {
   const [tabIndex, setTabIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isJoined, setIsJoined] = useState(false);
+  const [currency, setCurrency] = useState('');
 
   const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
   const [DonatemodalShow, setDonateModalShow] = useState(false);
@@ -45,6 +47,7 @@ export default function Goal() {
   let id = ''; //id from url
 
   useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
     setGoalID(router.query.goalId);
     id = router.query.goalId;
 
@@ -176,7 +179,10 @@ export default function Goal() {
                 width={300}
                 element={
                   <h5 className="font-semibold">
-                    <Link href={`../../${router.query.daoId}`}>{GoalURI?.Dao?.Title}</Link> &gt; Goals
+                    <Link className="text-piccolo" href={`../../${router.query.daoId}`}>
+                      {GoalURI?.Dao?.Title}
+                    </Link>{' '}
+                    &gt; Goals
                   </h5>
                 }
               />
@@ -187,7 +193,10 @@ export default function Goal() {
                 element={
                   <h3 className="flex gap-2 whitespace-nowrap">
                     <div>
-                      <span className="text-hit font-semibold">DEV {GoalURI.total_donated}</span> of DEV {GoalURI.Budget}
+                      <span className="text-hit font-semibold">
+                        {currency} {GoalURI.total_donated}
+                      </span>{' '}
+                      of {currency} {GoalURI.Budget}
                     </div>
                     <div>•</div>
                     <div>{list.length} ideas</div>

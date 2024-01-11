@@ -48,11 +48,7 @@ export const Joined = () => {
           }
         });
 
-        if (arrList.length > 0) {
-          setList(arrList.reverse());
-        } else {
-          router.push('/daos');
-        }
+        setList(arrList.reverse());
       }
     } catch (error) {}
 

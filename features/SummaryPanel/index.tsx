@@ -3,6 +3,8 @@ import Stats, { ProfileStats } from './Stats';
 import DAOCard from '../../components/components/DaoCard';
 import GoalCard from '../../components/components/GoalCard';
 import IdeaCard from '../../components/components/IdeaCard';
+import { useEffect, useState } from 'react';
+import useEnvironment from '../../services/useEnvironment';
 
 const mockDaos = [
   {
@@ -25,9 +27,15 @@ const mockIdeas = [
 ] as any[];
 
 const SummaryPanel = ({ stats }: { stats: ProfileStats }) => {
+  const [currency, setCurrency] = useState('');
+
+  useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
+  }, []);
+
   return (
     <div className="w-full flex flex-col gap-10">
-      <Stats stats={stats} />
+      <Stats stats={stats} currency={currency} />
       <div className="flex flex-col gap-5">
         <Tabs>
           <Tabs.List>

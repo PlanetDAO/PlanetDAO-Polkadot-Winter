@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import CreateDaoModal from '../../../features/CreateDaoModal';
 import { usePolkadotContext } from '../../../contexts/PolkadotContext';
+import useEnvironment from '../../../services/useEnvironment';
 
 declare let window: any;
 let running = false;
@@ -39,8 +40,10 @@ export function Nav(): JSX.Element {
 
           let token = ' ' + getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;
 
-          setAcc(userInfo.fullName.toString());
-          setLogo(userInfo.imgIpfs.toString());
+          useEnvironment.setCurrency(token);
+
+          setAcc(userInfo.fullName?.toString());
+          setLogo(userInfo.imgIpfs?.toString());
           setUser_id(window.userid);
 
           setBalance(Balance / 1e18 + token);
@@ -61,12 +64,15 @@ export function Nav(): JSX.Element {
         return;
       }
     } else if (window.localStorage.getItem('login-type') === 'polkadot') {
-      const { web3Accounts,web3Enable } = require('@polkadot/extension-dapp');
+      const { web3Accounts, web3Enable } = require('@polkadot/extension-dapp');
       try {
         let wallet = (await web3Accounts())[0];
         if (wallet && api && userInfo) {
           const { nonce, data: balance } = await api.query.system.account(wallet.address);
-          setBalance(Number(balance.free.toString()) / 1e12 + ' DOT');
+
+          useEnvironment.setCurrency('DOT');
+
+          setBalance(Number(balance.free.toString()) / 1e12 + ' ' + useEnvironment.getCurrency());
           if (!isSigned) setSigned(true);
           let subbing = 10;
 
@@ -98,7 +104,7 @@ export function Nav(): JSX.Element {
       window.localStorage.setItem('loggedin', '');
       window.localStorage.setItem('login-type', '');
 
-      if (location.pathname !== '/') {
+      if (location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register') {
         window.location.href = '/';
       }
     }

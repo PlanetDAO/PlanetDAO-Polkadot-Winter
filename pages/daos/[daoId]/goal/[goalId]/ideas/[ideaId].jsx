@@ -13,6 +13,7 @@ import Loader from '../../../../../../components/components/Loader';
 import { usePolkadotContext } from '../../../../../../contexts/PolkadotContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import useEnvironment from '../../../../../../services/useEnvironment';
 
 export default function GrantIdeas() {
   const { api, showToast, getUserInfoById, userInfo, GetAllDaos, PolkadotLoggedIn } = usePolkadotContext();
@@ -21,6 +22,7 @@ export default function GrantIdeas() {
   const [PollIndex, setPollIndex] = useState(-1);
   const [imageList, setimageList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
+  const [currency, setCurrency] = useState('');
 
   const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '', isVoted: true, isOwner: true, allfiles: [] });
   const [DonatemodalShow, setDonateModalShow] = useState(false);
@@ -64,6 +66,7 @@ export default function GrantIdeas() {
   let Goalid = ''; //Goal id
 
   useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
     setGoalId(router.query.goalId);
     setIdeasId(router.query.ideaId);
     id = router.query.ideaId;
@@ -300,7 +303,14 @@ export default function GrantIdeas() {
                 width={300}
                 element={
                   <h5 className="font-semibold">
-                    <Link href={`../../../../${router.query.daoId}`}>{IdeasURI?.daoURI?.Title}</Link> &gt; <Link href={`../../../../${router.query.daoId}/goal/${router.query.goalId}`}>{IdeasURI?.goalURI?.properties?.Title?.description}</Link> &gt; {IdeasURI?.Title}
+                    <Link href={`../../../../${router.query.daoId}`} className="text-piccolo">
+                      {IdeasURI?.daoURI?.Title}
+                    </Link>{' '}
+                    &gt;{' '}
+                    <Link className="text-piccolo" href={`../../../../${router.query.daoId}/goal/${router.query.goalId}`}>
+                      {IdeasURI?.goalURI?.properties?.Title?.description}
+                    </Link>{' '}
+                    &gt; {IdeasURI?.Title}
                   </h5>
                 }
               />
@@ -311,7 +321,10 @@ export default function GrantIdeas() {
                 element={
                   <h3 className="flex gap-2 whitespace-nowrap">
                     <div>
-                      Donated <span className="text-hit font-semibold">DEV {IdeasURI.donation}</span>
+                      Donated{' '}
+                      <span className="text-hit font-semibold">
+                        {currency} {IdeasURI.donation}
+                      </span>
                     </div>
                     <div>•</div>
                     <div>

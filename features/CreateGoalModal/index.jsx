@@ -261,75 +261,25 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <h6>
-                Structure
-                <Required />
-              </h6>
+            <div className="flex flex-col gap-1">
+              <h6>Vote power distribution</h6>
               <div className="flex gap-8">
-                <div className="bg-white rounded-lg flex flex-1 flex-col gap-1 text-moon-18 font-semibold pb-0 gap-6 pt-3">
-                  <h6
-                    onInput={(e) => {
-                      StructureLeft[0] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className=" hover:cursor-pointer bg-white flex items-center rounded-lg w-full outline-none"
-                  >
-                    Representatives
-                  </h6>
-                  <h6
-                    onInput={(e) => {
-                      StructureLeft[1] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className=" hover:cursor-pointer bg-white flex items-center rounded-lg w-full outline-none"
-                  >
-                    Community
-                  </h6>
-                  <h6
-                    onInput={(e) => {
-                      StructureLeft[2] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className=" hover:cursor-pointer bg-white flex items-center rounded-lg w-full outline-none"
-                  >
-                    Children
-                  </h6>
-                </div>
-                <div className="bg-white rounded-lg flex flex-1 flex-col gap-2 p-2  pb-2 w-48 pb-0">
-                  <h6
-                    onInput={(e) => {
-                      StructureRight[0] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className="border border-beerus hover:cursor-pointer bg-white flex hover:bg-goku items-center p-2 rounded-lg w-full outline-none"
-                  >
-                    20%
-                  </h6>
-                  <h6
-                    onInput={(e) => {
-                      StructureRight[1] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className="border border-beerus hover:cursor-pointer bg-white flex hover:bg-goku items-center p-2 rounded-lg w-full outline-none"
-                  >
-                    70%
-                  </h6>
-                  <h6
-                    onInput={(e) => {
-                      StructureRight[2] = e.currentTarget.innerText;
-                    }}
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    className="border border-beerus hover:cursor-pointer bg-white flex hover:bg-goku items-center p-2 rounded-lg w-full outline-none"
-                  >
-                    10%
-                  </h6>
+                <div className="bg-white rounded-lg flex flex-1 flex-col">
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 1 (lowest)</h6>
+                    <span className="text-trunks w-[160px]">1</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 2</h6>
+                    <span className="text-trunks w-[160px]">2</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 3</h6>
+                    <span className="text-trunks w-[160px]">3</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
                 </div>
               </div>
             </div>

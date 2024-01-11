@@ -10,7 +10,7 @@ export interface ProfileStats {
   donated: number;
 }
 
-const Stats = ({ stats }: { stats: ProfileStats }) => (
+const Stats = ({ stats, currency }: { stats: ProfileStats; currency: string }) => (
   <div className="flex flex-col gap-2 w-full">
     <div className="flex w-full gap-2">
       <ProfileStat value={stats.daosCreated} label="DAOs created" />
@@ -20,8 +20,8 @@ const Stats = ({ stats }: { stats: ProfileStats }) => (
       <ProfileStat value={stats.commentsReceived} label="Comments received" />
     </div>
     <div className="flex w-full gap-2">
-      <ProfileStat value={stats.donationsReceived} label="Donations received" isCurrency />
-      <ProfileStat value={stats.donated} label="Donated" isCurrency />
+      <ProfileStat value={stats.donationsReceived} label="Donations received" currency={currency} />
+      <ProfileStat value={stats.donated} label="Donated" currency={currency} />
     </div>
   </div>
 );

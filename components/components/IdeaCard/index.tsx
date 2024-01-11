@@ -4,10 +4,16 @@ import Card from '../Card';
 import Link from 'next/link';
 import { Button } from '@heathmont/moon-core-tw';
 import { ArrowsRightShort, GenericHeart, GenericIdea, ShopWallet } from '@heathmont/moon-icons-tw';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import useEnvironment from '../../../services/useEnvironment';
 
 const IdeaCard = ({ item, onClickVote, onClickDonate, preview, hideGoToButton, className }: { item: Idea; onClickVote?; onClickDonate?; preview?: boolean; hideGoToButton?: boolean; className?: string }) => {
   const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [currency, setCurrency] = useState('');
+
+  useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
+  }, []);
 
   return (
     <Card className={`max-w-[720px] ${className}`}>
@@ -19,7 +25,9 @@ const IdeaCard = ({ item, onClickVote, onClickDonate, preview, hideGoToButton, c
         <div className="flex flex-1 flex-col gap-2 relative px-5 text-moon-16">
           <p className="font-semibold text-moon-18">{item.Title}</p>
           <div>
-            <p className="font-semibold text-moon-20 text-hit">DEV {Number(item.donation)}</p>
+            <p className="font-semibold text-moon-20 text-hit">
+              {currency} {Number(item.donation)}
+            </p>
             <p>in donations</p>
           </div>
           <div>

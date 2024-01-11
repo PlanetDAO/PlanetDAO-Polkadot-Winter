@@ -5,19 +5,22 @@ import { format } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
 import { JOINED } from '../../data-model/joined';
+import useEnvironment from '../../services/useEnvironment';
 
 const mockData = [
-  { name: 'Steve thijssen', joinDate: new Date('2023-12-05'), votePower: 3, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.40 },
-  { name: 'Baha Uddin', joinDate: new Date('2023-12-24'), votePower: 2, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.40 },
-  { name: 'Arjen van Gaal', joinDate: new Date('2024-01-03'), votePower: 1, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.40 },
-  { name: 'Thomas Goethals', joinDate: new Date('2024-01-05'), votePower: 1, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.40 }
+  { name: 'Steve thijssen', joinDate: new Date('2023-12-05'), votePower: 3, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.4 },
+  { name: 'Baha Uddin', joinDate: new Date('2023-12-24'), votePower: 2, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.4 },
+  { name: 'Arjen van Gaal', joinDate: new Date('2024-01-03'), votePower: 1, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.4 },
+  { name: 'Thomas Goethals', joinDate: new Date('2024-01-05'), votePower: 1, votesReceived: 36, commentsReceived: 15, donationsReceived: 2, donated: 2.4 }
 ];
 
 const HeaderLabel = ({ children }) => <label className="flex items-center h-full">{children}</label>;
 
-const MembersTable = ({daoId}) => {
-  const {api,GetAllJoined,getUserInfoById} =  usePolkadotContext();
-  const [Data,setData] = useState([])
+const MembersTable = ({ daoId }) => {
+  const { api, GetAllJoined, getUserInfoById } = usePolkadotContext();
+  const [Data, setData] = useState([]);
+  const [currency, setCurrency] = useState('');
+
   const columnsInitial = [
     {
       Header: <HeaderLabel>Name</HeaderLabel>,
@@ -38,7 +41,7 @@ const MembersTable = ({daoId}) => {
               </div>
             </Tooltip.Trigger>
             <Tooltip.Content className="bg-gohan">
-              This may need some explanation
+              This level is based on amount of received donations, votes, and comments within this community.
               <Tooltip.Arrow className="bg-gohan" />
             </Tooltip.Content>
           </Tooltip>
@@ -63,7 +66,19 @@ const MembersTable = ({daoId}) => {
     }
   ];
 
-  const formatData = (items) => items.map((item) => ({ name: item.name, joinDate: <span>{format(item.joinDate, 'dd MMM yyyy')}</span>, votePower: item.votePower, votesReceived: item.votesReceived, commentsReceived: item.commentsReceived, donationsReceived: <span>{item.donationsReceived} (DOT {item.donated})</span> }));
+  const formatData = (items) =>
+    items.map((item) => ({
+      name: item.name,
+      joinDate: <span>{format(item.joinDate, 'dd MMM yyyy')}</span>,
+      votePower: item.votePower,
+      votesReceived: item.votesReceived,
+      commentsReceived: 15,
+      donationsReceived: (
+        <span>
+          {item.donationsReceived} ({{ currency }} 2.40)
+        </span>
+      )
+    }));
 
   const defaultColumn = useMemo(
     () => ({
@@ -75,34 +90,38 @@ const MembersTable = ({daoId}) => {
 
   const columns = useMemo(() => columnsInitial, []);
 
-    async function loadData(){
-      if (api){
-        let allJoined = (await GetAllJoined() ) ;
-        let Members = [];
-        for (let i = 0; i < allJoined.length; i++) {
-          const element = allJoined[i];
-          let userInfo = await getUserInfoById(element.user_id);
-          let info = {
-            name:userInfo?.fullName?.toString(),
-            joinDate: element.joined_date,
-            votePower:1,
-            votesReceived:0,
-            commentsReceived:0,
-            donationsReceived:0,
-            donated:0,
-          };
+  async function loadData() {
+    if (api) {
+      let allJoined = await GetAllJoined();
+      let Members = [];
+      for (let i = 0; i < allJoined.length; i++) {
+        const element = allJoined[i];
+        let userInfo = await getUserInfoById(element.user_id);
+        let info = {
+          name: userInfo?.fullName?.toString(),
+          joinDate: element.joined_date,
+          votePower: 1,
+          votesReceived: 0,
+          commentsReceived: 0,
+          donationsReceived: 0,
+          donated: 0
+        };
 
-          Members.push(info);
-        }
-      
-        // let formattedData = formatData(Members);
-
-        setData(Members);
+        Members.push(info);
       }
+
+      // let formattedData = formatData(Members);
+
+      setData(Members);
     }
-    useEffect(()=>{
-      loadData()
-    },[])
+  }
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    setCurrency(useEnvironment.getCurrency());
+  }, []);
 
   return (
     <>
