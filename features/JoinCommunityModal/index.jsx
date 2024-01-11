@@ -10,7 +10,7 @@ import { ControlsClose } from '@heathmont/moon-icons-tw';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 
-export default function JoinCommunityModal({ SubsPrice, show, onHide, address, recieveWallet, recievetype,title, daoId }) {
+export default function JoinCommunityModal({ SubsPrice, show, onHide, address, recieveWallet, recievetype, title, daoId }) {
   const [Balance, setBalance] = useState('');
   const [Token, setToken] = useState('');
   const [isLoading, setisLoading] = useState(false);
@@ -74,33 +74,31 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
     }
     if (Coin == "DOT") {
       toast.update(id, {
-        render: 'Purchasing Subscription....',
+        render: 'Joining Community....',
         type: 'pending'
       });
-      let recipient = recieveWallet == ""? address:recieveWallet;
-      const transfer = api.tx.balances.transferAllowDeath(recipient, `${Amount*1e12}`).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, id, 'Purchased Subscription successfully!', async()=>{
-          toast.update(id, {
-            render: 'Joining Community....',
-            type: 'pending'
-          });
-          await api._extrinsics.daos.joinCommunity(daoId, Number(window.userid),(new Date()).toLocaleDateString(), feed).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-            showToast(status, id, 'Joined successfully!', ()=>{  onSuccess()});
-          });
+      let recipient = recieveWallet == "" ? address : recieveWallet;
+      const txs = [
+        api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
+        api._extrinsics.daos.joinCommunity(daoId, Number(window.userid), (new Date()).toLocaleDateString(), feed),
+        // api._extrinsics.feeds.add_Feed(, feed)
         
-        });
+      ];
+
+      const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, id, 'Joined successfully!', () => { onSuccess() });
       });
-     
+
 
     } else {
-      let recipient = recievetype == "Polkadot"? address:recieveWallet;
+      let recipient = recievetype == "Polkadot" ? address : recieveWallet;
       if (Number(window.ethereum.networkVersion) === 1287) {
         toast.update(id, {
           render: 'Sending Batch Transaction....',
           type: 'pending'
         });
-       
-      await BatchJoin(Amount, recipient, daoIdNumber, feed);
+
+        await BatchJoin(Amount, recipient, daoIdNumber, feed);
         toast.update(id, {
           render: 'Purchased Subscription successfully!',
           type: 'success',
@@ -119,7 +117,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
         });
 
         // Saving Joined Person on smart contract
-        await sendTransaction(await window.contract.populateTransaction.join_community(daoIdNumber, Number(window.userid),new Date().toLocaleDateString(),feed));
+        await sendTransaction(await window.contract.populateTransaction.join_community(daoIdNumber, Number(window.userid), new Date().toLocaleDateString(), feed));
         onSuccess();
       }
     }
