@@ -17,7 +17,7 @@ let addedDate = false;
 export default function CreateDaoModal({ open, onClose }) {
   const [DaoImage, setDaoImage] = useState([]);
   const [creating, setCreating] = useState(false);
-  const [RecieveType, setRecieveType] = useState("EVM");
+  const [RecieveType, setRecieveType] = useState('EVM');
 
   const { api, showToast, userWalletPolkadot, userSigner, PolkadotLoggedIn } = usePolkadotContext();
   const { contract, sendTransaction, formatTemplate, signerAddress } = useContract();
@@ -64,9 +64,9 @@ export default function CreateDaoModal({ open, onClose }) {
   useEffect(() => {
     let dateTime = new Date();
     if (!PolkadotLoggedIn) {
-      setRecieveType("Polkadot")
+      setRecieveType('Polkadot');
     } else {
-      setRecieveType("EVM")
+      setRecieveType('EVM');
     }
     if (!addedDate) setStartDate(dateTime.toISOString().split('T')[0]);
   }, [PolkadotLoggedIn]);
@@ -149,7 +149,7 @@ export default function CreateDaoModal({ open, onClose }) {
         },
         Created_Date: {
           type: 'string',
-          description: (new Date()).toLocaleDateString()
+          description: new Date().toLocaleDateString()
         },
         allFiles
       }
@@ -260,7 +260,7 @@ export default function CreateDaoModal({ open, onClose }) {
       <Modal.Panel className="bg-gohan w-[90%] max-w-[600px] max-h-[95vh]">
         <div className="flex items-center justify-center flex-col">
           <div className="flex justify-between items-center w-full border-b border-beerus py-4 px-6">
-            <h1 className="text-moon-20 font-semibold">Create community</h1>
+            {<h1 className="text-moon-20 font-semibold">Create community</h1>}
             <IconButton className="text-trunks" variant="ghost" icon={<ControlsClose />} onClick={onClose} />
           </div>
           <div className="flex flex-col gap-6 w-full p-6 max-h-[calc(90vh-162px)] overflow-auto">
@@ -309,9 +309,31 @@ export default function CreateDaoModal({ open, onClose }) {
               </h6>
               <div className="flex gap-4">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="DaoImage" name="DaoImage" type="file" />
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
                   {DaoImage.length < 1 && <AddImageInput onClick={AddBTNClick} />}
                   <ImageListDisplay images={DaoImage} onDeleteImage={DeleteSelectedImages} />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h6>Vote power distribution</h6>
+              <div className="flex gap-8">
+                <div className="bg-white rounded-lg flex flex-1 flex-col">
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 1 (lowest)</h6>
+                    <span className="text-trunks w-[160px]">1</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 2</h6>
+                    <span className="text-trunks w-[160px]">2</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
+                  <div className="flex w-full h-12 items-center">
+                    <h6 className="text-moon-18 font-semibold flex-1">Level 3</h6>
+                    <span className="text-trunks w-[160px]">3</span>
+                    <span className="text-trunks">votes</span>
+                  </div>
                 </div>
               </div>
             </div>

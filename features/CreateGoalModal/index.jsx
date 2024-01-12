@@ -17,8 +17,8 @@ let addedDate = false;
 export default function CreateGoalModal({ open, onClose, daoId }) {
   const [GoalImage, setGoalImage] = useState([]);
   const [creating, setCreating] = useState(false);
-  const {  sendTransaction } = useContract();
-  const { api, userInfo,showToast, userWalletPolkadot, userSigner, PolkadotLoggedIn } = usePolkadotContext();
+  const { sendTransaction } = useContract();
+  const { api, userInfo, showToast, userWalletPolkadot, userSigner, PolkadotLoggedIn } = usePolkadotContext();
 
   //Storage API for images and videos
   const NFT_STORAGE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDJDMDBFOGEzZEEwNzA5ZkI5MUQ1MDVmNDVGNUUwY0Q4YUYyRTMwN0MiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1NDQ3MTgxOTY2NSwibmFtZSI6IlplbmNvbiJ9.6znEiSkiLKZX-a9q-CKvr4x7HS675EDdaXP622VmYs8';
@@ -131,15 +131,13 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
     };
     console.log('======================>Creating Goal');
     toast.update(ToastId, { render: 'Creating Goal...', isLoading: true });
-    
-    let feed = ({
+
+    let feed = {
       name: userInfo?.fullName,
-      daoId:daoId,
+      daoId: daoId,
       goalid: 0,
       budget: Budget
-    });
-
-
+    };
 
     async function onSuccess() {
       setCreating(false);
@@ -149,21 +147,19 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
       }, 1000);
     }
     if (PolkadotLoggedIn) {
-      let goalid =  Number(await api._query.goals.goalIds());
-      feed.goalid = "p_"+goalid;
-      const txs = [
-        api._extrinsics.goals.createGoal(JSON.stringify(createdObject), daoId, Number(window.userid), JSON.stringify(feed)),
-        api._extrinsics.feeds.addFeed( JSON.stringify(feed),"goal",new Date().valueOf())
-        
-      ];
+      let goalid = Number(await api._query.goals.goalIds());
+      feed.goalid = 'p_' + goalid;
+      const txs = [api._extrinsics.goals.createGoal(JSON.stringify(createdObject), daoId, Number(window.userid), JSON.stringify(feed)), api._extrinsics.feeds.addFeed(JSON.stringify(feed), 'goal', new Date().valueOf())];
 
       const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, ToastId, 'Created successfully!', () => { onSuccess() });
+        showToast(status, ToastId, 'Created successfully!', () => {
+          onSuccess();
+        });
       });
     } else {
       try {
         const goalid = Number(await contract._goal_ids());
-        feed.goalid = "m_"+goalid;
+        feed.goalid = 'm_' + goalid;
 
         // Creating Goal in Smart contract
         await sendTransaction(await window.contract.populateTransaction.create_goal(JSON.stringify(createdObject), daoId, Number(window.userid), JSON.stringify(feed)));
@@ -176,13 +172,11 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
           closeOnClick: true,
           draggable: true
         });
-
-
       } catch (error) {
         setCreating(false);
         console.error(error);
 
-        return;        
+        return;
       }
     }
   }
@@ -279,31 +273,9 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
               </h6>
               <div className="content-start flex flex-row flex-wrap gap-4 justify-start overflow-auto relative text-center text-white w-full">
                 <input className="file-input" hidden onChange={FilehandleChange} accept="image/*" id="GoalImage" name="GoalImage" type="file" />
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
                   {GoalImage.length < 1 && <AddImageInput onClick={AddBTNClick} />}
                   <ImageListDisplay images={GoalImage} onDeleteImage={DeleteSelectedImages} />
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <h6>Vote power distribution</h6>
-              <div className="flex gap-8">
-                <div className="bg-white rounded-lg flex flex-1 flex-col">
-                  <div className="flex w-full h-12 items-center">
-                    <h6 className="text-moon-18 font-semibold flex-1">Level 1 (lowest)</h6>
-                    <span className="text-trunks w-[160px]">1</span>
-                    <span className="text-trunks">votes</span>
-                  </div>
-                  <div className="flex w-full h-12 items-center">
-                    <h6 className="text-moon-18 font-semibold flex-1">Level 2</h6>
-                    <span className="text-trunks w-[160px]">2</span>
-                    <span className="text-trunks">votes</span>
-                  </div>
-                  <div className="flex w-full h-12 items-center">
-                    <h6 className="text-moon-18 font-semibold flex-1">Level 3</h6>
-                    <span className="text-trunks w-[160px]">3</span>
-                    <span className="text-trunks">votes</span>
-                  </div>
                 </div>
               </div>
             </div>

@@ -1,6 +1,5 @@
 export interface JOINED {
-    id: string;
-    daoid: string;
-    user_id: string;
-  }
-  
+  id: string;
+  daoId: string;
+  user_id: string;
+}

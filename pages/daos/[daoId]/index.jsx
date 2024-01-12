@@ -13,11 +13,12 @@ import { usePolkadotContext } from '../../../contexts/PolkadotContext';
 import EmptyState from '../../../components/components/EmptyState';
 import MembersTable from '../../../features/MembersTable';
 import { useRouter } from 'next/router';
+import CommunitySwitcher from './CommunitySwitcher';
 
 export default function DAO() {
   //Variables
   const [list, setList] = useState([]);
-  const { api, showToast, getUserInfoById, PolkadotLoggedIn ,GetAllJoined,GetAllGoals} = usePolkadotContext();
+  const { api, showToast, getUserInfoById, PolkadotLoggedIn, GetAllJoined, GetAllGoals } = usePolkadotContext();
   const [DaoURI, setDaoURI] = useState({ Title: '', Description: '', SubsPrice: 0, Start_Date: '', End_Date: '', logo: '', wallet: '', typeimg: '', allFiles: [], isOwner: false });
   const [daoIdTxt, setDaoTxtID] = useState('');
   const [daoId, setDaoID] = useState(-1);
@@ -31,7 +32,7 @@ export default function DAO() {
   const [aboutTemplate, setAboutTemplate] = useState('');
   const [tabIndex, setTabIndex] = useState(0);
   const [daoType, setDaoType] = useState('polkadot');
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
+  const [communityMembers, setCommunityMembers] = useState([]);
 
   const router = useRouter();
 
@@ -95,17 +96,17 @@ export default function DAO() {
     let user_info = await getUserInfoById(daoURI.properties?.user_id?.description);
 
     let allJoined = await GetAllJoined();
-    let currentJoined =  (allJoined).filter((e) => (e?.daoId) == (daoIdTxt.toString()))
-    let joinedInfo = currentJoined.filter((e)=>e?.user_id.toString() == window.userid.toString() )
+    let currentJoined = allJoined.filter((e) => e?.daoId == daoIdTxt.toString());
+    let joinedInfo = currentJoined.filter((e) => e?.user_id.toString() == window.userid.toString());
     if (joinedInfo.length > 0) {
-       setIsJoined(true);
-       setJoinedID(joinedInfo.id);
-    }else{
+      setIsJoined(true);
+      setJoinedID(joinedInfo.id);
+    } else {
       setIsJoined(false);
       setJoinedID(9999);
     }
 
-    setJoinedCommunities(currentJoined);
+    setCommunityMembers(currentJoined);
     let daoURIShort = {
       Title: daoURI.properties.Title.description,
       Description: daoURI.properties.Description.description,
@@ -141,7 +142,6 @@ export default function DAO() {
         const daoURI = await contract.dao_uri(Number(daoId)); //Getting dao URI
         const template_html = await contract._template_uris(daoId);
 
-
         UpdateDaoData(daoURI, template_html);
       }
     }
@@ -155,10 +155,9 @@ export default function DAO() {
     try {
       if (api && daoId !== undefined && daoId !== null) {
         //Load everything-----------
-   
-        let allGoals = await GetAllGoals();
-       let currentGoals =  (allGoals).filter((e) => (e?.daoId) == (daoIdTxt.toString()))
 
+        let allGoals = await GetAllGoals();
+        let currentGoals = allGoals.filter((e) => e?.daoId == daoIdTxt.toString());
 
         const arr = [];
         for (let i = 0; i < currentGoals.length; i++) {
@@ -193,13 +192,12 @@ export default function DAO() {
           //     End_Date: object.properties.End_Date.description,
           //     logo: object.properties.logo.description?.url,
           //     ideasCount: Object.keys(totalIdeas).filter((item, idx) => item !== '').length
-            // });
+          // });
           // }
         }
 
         setLoading(false);
         setList(arr.reverse());
-       
       }
     } catch (error) {}
     setLoading(false);
@@ -226,7 +224,7 @@ export default function DAO() {
           <div className="container flex w-full justify-between relative">
             <div className="flex flex-col gap-1">
               <h5 className="font-semibold">Community</h5>
-              {DaoURI.Title}
+              <CommunitySwitcher title={DaoURI.Title} daoId={daoIdTxt} />
               <h3 className="flex gap-2 whitespace-nowrap">
                 <div className="flex">
                   Managed by &nbsp;
@@ -272,7 +270,7 @@ export default function DAO() {
                 <Tabs.Tab>Feed</Tabs.Tab>
                 <Tabs.Tab>About</Tabs.Tab>
                 <Tabs.Tab>Goals ({list.length})</Tabs.Tab>
-                <Tabs.Tab>Members ({joinedCommunities.length})</Tabs.Tab>
+                <Tabs.Tab>Members ({communityMembers.length})</Tabs.Tab>
               </Tabs.List>
             </Tabs>
           </div>
@@ -290,7 +288,7 @@ export default function DAO() {
         )}
         {tabIndex === 3 && (
           <div className="flex flex-col gap-8 container items-center pb-10">
-            <MembersTable allJoined={joinedCommunities} />
+            <MembersTable allJoined={communityMembers} />
           </div>
         )}
       </div>
