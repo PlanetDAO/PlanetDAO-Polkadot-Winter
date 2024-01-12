@@ -37,7 +37,8 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
     defaultValue: '',
     type: 'number',
     placeholder: '0.00',
-    id: 'amount'
+    id: 'amount',
+    className: 'max-w-[140px]'
   });
 
   function ShowAlert(type = 'default', message) {
@@ -159,31 +160,33 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
                 </Alert>
               </div>
 
-              <div className="flex flex-col gap-2 p-6 pb-3">
-                <Dropdown value={Coin} onChange={setCoin}>
-                  <Dropdown.Select label="Coin" placeholder="Choose an option">
-                    {Coin}
-                  </Dropdown.Select>
-                  <Dropdown.Options className="bg-gohan w-48 min-w-0 w-full">
-                    <Dropdown.Option value="DEV">
-                      <MenuItem>DEV</MenuItem>
-                    </Dropdown.Option>
-                    <Dropdown.Option value="xcvGLMR">
-                      <MenuItem>xcvGLMR</MenuItem>
-                    </Dropdown.Option>
-                  </Dropdown.Options>
-                </Dropdown>
+              <div className="flex flex-col gap-2 py-16 px-6">
+                <div className="flex items-center ">
+                  <span className="font-semibold flex-1">Total</span>
+                  <div className="max-w-[140px] mr-4"> {AmountInput}</div>
+                  <Dropdown value={Coin} onChange={setCoin} className="max-w-[100px]">
+                    <Dropdown.Select>{Coin}</Dropdown.Select>
+                    <Dropdown.Options className="bg-gohan w-48 min-w-0">
+                      <Dropdown.Option value="DEV">
+                        <MenuItem>DEV</MenuItem>
+                      </Dropdown.Option>
+                      <Dropdown.Option value="xcvGLMR">
+                        <MenuItem>xcvGLMR</MenuItem>
+                      </Dropdown.Option>
+                    </Dropdown.Options>
+                  </Dropdown>
+                </div>
+
+                <p className="text-trunks w-full text-right">Your balance is {Balance} </p>
               </div>
 
-              <div className="flex flex-col gap-2 p-6 pt-3">
+              {/* <div className="flex flex-col gap-2 p-6 pt-3">
                 <h6>
                   Amount
                   <Required />
                 </h6>
-                {AmountInput}
-                <p className="text-moon-12">Your balance is {Balance} </p>
               </div>
-
+ */}
               <div className="flex justify-between border-t border-beerus w-full p-6">
                 <Button variant="ghost" onClick={onHide}>
                   Cancel

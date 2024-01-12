@@ -1093,6 +1093,10 @@ video {
   margin-top: 126px;
 }
 
+.mr-4{
+  margin-right: 1rem;
+}
+
 .box-border{
   box-sizing: border-box;
 }
@@ -1419,6 +1423,10 @@ video {
   min-width: 8.5rem;
 }
 
+.max-w-\[100px\]{
+  max-width: 100px;
+}
+
 .max-w-\[120px\]{
   max-width: 120px;
 }
@@ -1465,6 +1473,10 @@ video {
 
 .max-w-xs{
   max-width: 20rem;
+}
+
+.max-w-\[140px\]{
+  max-width: 140px;
 }
 
 .flex-1{
@@ -2325,10 +2337,6 @@ video {
 
 .pb-2{
   padding-bottom: 0.5rem;
-}
-
-.pb-3{
-  padding-bottom: 0.75rem;
 }
 
 .pb-6{
