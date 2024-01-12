@@ -3,6 +3,7 @@ export interface Idea {
   Title: string;
   Description: string;
   wallet: string;
+  user_id: number;
   logo?: string;
   allfiles: unknown;
   donation: number;

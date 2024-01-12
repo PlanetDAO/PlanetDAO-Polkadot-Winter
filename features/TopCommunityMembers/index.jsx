@@ -7,7 +7,7 @@ import useEnvironment from '../../services/useEnvironment';
 
 const options = [{ id: 'most_donations_received', label: 'Received donations' }];
 
-export const TopCommunityMembers = ({ daoId }) => {
+export const TopCommunityMembers = ({ daoId,allJoined }) => {
   const [selectedOption, setSelectedOption] = useState(options[0]);
   const { getUserInfoById } = usePolkadotContext();
   const [items, setItems] = useState([]);
@@ -26,20 +26,20 @@ export const TopCommunityMembers = ({ daoId }) => {
 
         for (let i = 0; i < Number(totalDonations); i++) {
           const donated = await contract._donations(i);
-          let dao_id_of_donated = await contract.get_dao_id_by_ideas_id(Number(donated.ideas_id));
-          if (dao_id_of_donated == daoId) {
-            let foundUserDonated = alldonations.findIndex((item, idx) => item.userid == Number(donated.userid));
-            if (foundUserDonated == -1) {
-              let user_info = await getUserInfoById(Number(donated.userid));
-              alldonations.push({
-                userid: Number(donated.userid),
-                name: user_info?.fullName?.toString(),
-                amount: Number(donated.donation) / 1e18
-              });
-            } else {
-              alldonations[foundUserDonated].amount += Number(donated.donation) / 1e18;
-            }
-          }
+          // let dao_id_of_donated = await contract.get_dao_id_by_ideas_id(Number(donated.ideas_id));
+          // if (dao_id_of_donated == daoId) {
+          //   let foundUserDonated = alldonations.findIndex((item, idx) => item.userid == Number(donated.userid));
+          //   if (foundUserDonated == -1) {
+          //     let user_info = await getUserInfoById(Number(donated.userid));
+          //     alldonations.push({
+          //       userid: Number(donated.userid),
+          //       name: user_info?.fullName?.toString(),
+          //       amount: Number(donated.donation) / 1e18
+          //     });
+          //   } else {
+          //     alldonations[foundUserDonated].amount += Number(donated.donation) / 1e18;
+          //   }
+          // }
         }
         setItems(alldonations);
         setisLoading(false);

@@ -18,7 +18,8 @@ const AppContext = createContext({
   GetAllJoined: async () => { },
   GetAllGoals: async () => { },
   GetAllFeeds:async ()=>{},
-  getUserInfoById: async (userid) => { },
+  GetAllIdeas:async ()=>{},
+    getUserInfoById: async (userid) => { },
   updateCurrentUser: () => { }
 });
 
@@ -349,7 +350,7 @@ export function PolkadotProvider({ children }) {
           const element = await api._query.feeds.feedById(i);
           let newElm = {
             id: element['__internal__raw'].feedId.toString(),
-            date:  new Date(Number(element['__internal__raw'].date)* 1000),
+            date:  new Date(Number(element['__internal__raw'].date)),
             type: element['__internal__raw'].feedType.toString(),
             data: JSON.parse(element['__internal__raw'].data.toString())
           };
@@ -393,7 +394,99 @@ export function PolkadotProvider({ children }) {
   }
 
 
-  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals, GetAllFeeds:GetAllFeeds,updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
+  
+  async function InsertIdeaData(totalIdeaCount, allIdeas, prefix) {
+    const arr = [];
+    for (let i = 0; i < totalIdeaCount; i++) {
+      let object = '';
+      let goalId = "";
+      if (prefix == 'm_') {
+        object = JSON.parse(allIdeas[i].ideas_uri);
+        goalId = allIdeas[i].goal_id;
+      } else {
+        if (allIdeas[i]?.ideasUri) {
+          object = JSON.parse(allIdeas[i].ideasUri?.toString());
+          goalId = allIdeas[i].goalId.toString();
+        }
+      }
+
+      if (object) {
+        arr.push({
+          //Pushing all data into array
+          id: i,
+          ideasId: prefix + i,
+          goalId: goalId,
+          Title: object.properties.Title.description,
+          Description: object.properties.Description.description,
+          wallet: object.properties.wallet.description,
+          logo: object.properties.logo.description?.url,
+          user_id: Number( object.properties.user_id.description),
+          allfiles: object.properties.allFiles,
+          donation:0,
+          votes:0,
+          isVoted:false,
+          isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
+
+          type: prefix == 'm_' ? 'Polkadot' : 'EVM',
+        });
+      }
+    }
+    return arr;
+  }
+  async function fetchPolkadotIdeaData() {
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalIdeaCount = Number(await api._query.ideas.ideasIds());
+
+        let totalIdea = async () => {
+          let arr = [];
+          for (let i = 0; i < totalIdeaCount; i++) {
+            const element = await api._query.ideas.ideasById(i);
+            let ideaURI = element['__internal__raw'];
+
+            arr.push(ideaURI);
+          }
+          return arr;
+        };
+
+        let arr = InsertIdeaData(totalIdeaCount, await totalIdea(), 'p_');
+        return arr;
+      }
+    } catch (error) { }
+    return [];
+  }
+  async function fetchContractIdeaData() {
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+        const totalIdeaCount = Number(await contract._ideas_ids());
+        let totalIdea = async () => {
+          const arr = [];
+          for (let i = 0; i < Number(totalIdeaCount); i++) {
+            const idea_info = await contract._ideas_uris(i);
+            arr.push(idea_info);
+          }
+          return arr;
+        }
+        let arr = InsertIdeaData(totalIdeaCount, await totalIdea(), 'm_');
+        return arr;
+
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllIdeas() {
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotIdeaData());
+    arr = arr.concat(await fetchContractIdeaData());
+    return arr;
+  }
+
+
+
+  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals,GetAllIdeas:GetAllIdeas, GetAllFeeds:GetAllFeeds,updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

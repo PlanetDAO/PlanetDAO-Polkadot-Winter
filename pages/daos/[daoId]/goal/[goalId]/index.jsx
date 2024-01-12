@@ -17,9 +17,10 @@ import useEnvironment from '../../../../../services/useEnvironment';
 export default function Goal() {
   //Variables
   const [list, setList] = useState([]);
-  const { api, showToast,GetAllJoined, getUserInfoById, GetAllDaos,GetAllGoals, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, showToast,GetAllJoined, getUserInfoById, GetAllDaos,GetAllGoals, GetAllIdeas,PolkadotLoggedIn } = usePolkadotContext();
   const [GoalURI, setGoalURI] = useState({
     goalId: '',
+    daoId:"",
     Title: '',
     Description: '',
     Budget: '',
@@ -100,7 +101,9 @@ export default function Goal() {
 
         // const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(id)); //Getting total goal (Number)
         // let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
-        const arr = [];
+        let arr = [];
+        let allIdeas = await GetAllIdeas(); 
+        arr = allIdeas;
         // let total_donated = 0;
         // for (let i = 0; i < Object.keys(totalIdeas).length; i++) {
         //   //total goal number Iteration
@@ -288,7 +291,7 @@ export default function Goal() {
           </div>
         )}
       </div>
-      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} goalId={goalId} />
+      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} goalId={goalIdTxt} daoId={GoalURI.daoId} goalTitle={GoalURI.Title}/>
       <DonateCoinModal ideasid={selectedIdeasId} show={DonatemodalShow} onHide={closeDonateModal} address={selectedIdeasWallet} />
     </>
   );

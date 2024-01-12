@@ -15,7 +15,7 @@ contract PlanetDAO {
   }
 
   struct ideas_uri_struct {
-    uint256 goal_id;
+    string goal_id;
     string ideas_uri;
     uint256 donation;
   }
@@ -205,13 +205,13 @@ contract PlanetDAO {
     return 0;
   }
   
-  function get_dao_id_by_ideas_id(uint256 ideas_id) public view returns (string memory) {
+  // function get_dao_id_by_ideas_id(uint256 ideas_id) public view returns (string memory) {
     
-    uint256 goal_id= _ideas_uris[ideas_id].goal_id;
-    string memory dao_id = _goal_uris[goal_id].dao_id;
+  //   string memory  goal_id= _ideas_uris[ideas_id].goal_id;
+  //   string memory dao_id = _goal_uris[goal_id].dao_id;
     
-    return dao_id;
-  }
+  //   return dao_id;
+  // }
 
   function goal_uri(uint256 _goal_id) public view returns (string memory) {
     //Getting one goal URI
@@ -219,7 +219,7 @@ contract PlanetDAO {
   }
 
   //Ideas
-  function create_ideas(string memory _ideas_uri, uint256 _goal_id, string[] memory _smart_contracts, uint256 _user_id, string memory _feed) public returns (uint256) {
+  function create_ideas(string memory _ideas_uri, string memory _goal_id, string[] memory _smart_contracts, uint256 _user_id, string memory _feed) public returns (uint256) {
     //Create ideas into _ideas_uris
     _ideas_uris[_ideas_ids] = ideas_uri_struct(_goal_id, _ideas_uri, 0);
     _user_badges[_user_id].ideas = true;
@@ -292,12 +292,12 @@ contract PlanetDAO {
     return _StoreInfo;
   }
 
-  function get_all_ideas_by_goal_id(uint256 _goal_id) public view returns (string[] memory) {
+  function get_all_ideas_by_goal_id(string memory  _goal_id) public view returns (string[] memory) {
     //Getting all ideas by goal id
     string[] memory _StoreInfo = new string[](_ideas_ids);
     uint256 _store_id;
     for (uint256 i = 0; i < _ideas_ids; i++) {
-      if (_ideas_uris[i].goal_id == _goal_id) _StoreInfo[_store_id] = _ideas_uris[i].ideas_uri;
+      if (keccak256(bytes(_ideas_uris[i].goal_id)) == keccak256(bytes(_goal_id))) _StoreInfo[_store_id] = _ideas_uris[i].ideas_uri;
       _store_id++;
     }
 
@@ -313,13 +313,13 @@ contract PlanetDAO {
     return 0;
   }
 
-  function get_goal_id_from_ideas_uri(string memory _ideas_uri) public view returns (uint256) {
+  function get_goal_id_from_ideas_uri(string memory _ideas_uri) public view returns (string memory) {
     //Getting ideas id by uri
     for (uint256 i = 0; i < _ideas_ids; i++) {
       if (keccak256(bytes(_ideas_uris[i].ideas_uri)) == keccak256(bytes(_ideas_uri))) return _ideas_uris[i].goal_id;
     }
 
-    return 0;
+    return "";
   }
 
   function ideas_uri(uint256 _ideas_id) public view returns (string memory) {

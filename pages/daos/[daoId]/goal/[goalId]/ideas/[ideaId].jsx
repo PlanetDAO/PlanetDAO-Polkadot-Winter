@@ -16,13 +16,14 @@ import Link from 'next/link';
 import useEnvironment from '../../../../../../services/useEnvironment';
 
 export default function GrantIdeas() {
-  const { api, showToast, getUserInfoById, userInfo, GetAllDaos, PolkadotLoggedIn } = usePolkadotContext();
-  const [ideaId, setIdeasId] = useState(-1);
-  const [goalId, setGoalId] = useState(-1);
+  const { api, showToast, getUserInfoById, userInfo, GetAllDaos,GetAllGoals,GetAllJoined, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
+  const [ideaId, setIdeasId] = useState("");
+  const [goalId, setGoalId] = useState("");
   const [PollIndex, setPollIndex] = useState(-1);
   const [imageList, setimageList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
   const [currency, setCurrency] = useState('');
+  const [CurrentDAO, setCurrentDAO] = useState({});
 
   const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '', isVoted: true, isOwner: true, allfiles: [] });
   const [DonatemodalShow, setDonateModalShow] = useState(false);
@@ -83,51 +84,73 @@ export default function GrantIdeas() {
     setLoading(true);
 
     try {
-      if (contract && id && api) {
-        setIdeasId(id); //setting Ideas id
-        id = Number(id);
+      if (contract && id != "" && Goalid != "" && api) {
+        
+        let allIdeas = await GetAllIdeas()
+        let currentIdea=allIdeas.filter(e=>e.ideasId == id)[0]
 
-        const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
-        const object = JSON.parse(ideaURI); //Getting ideas uri
+        let allGoals = await GetAllGoals()
+        let currentGoal =allGoals.filter(e=>e.goalId == Goalid)[0] 
 
-        let isJoined = await contract.is_person_joined(Number(Goalid), Number(window.userid));
-        setIsJoined(isJoined);
+        currentIdea.End_Date = currentGoal.End_Date;
+        currentIdea.goalURI = currentGoal;
+        currentIdea.user_info = await getUserInfoById(Number(currentIdea.user_id));
 
-        const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
-        const goalURI = JSON.parse(goalURIFull.goal_uri);
-        let allDaos = await GetAllDaos();
-        let goalDAO = allDaos.filter((e) => (e.daoId = goalURIFull.dao_id))[0];
 
-        let isvoted = false;
-        const AllvotesWithEmpty = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(id)); //Getting all votes
-        const Allvotes = AllvotesWithEmpty.filter((item, idx) => item !== '');
+        let allDaos = await GetAllDaos()
+        let currentDao =allDaos.filter(e=>e.daoId == currentGoal.daoId)[0] 
 
-        for (let i = 0; i < Allvotes.length; i++) {
-          const element = Number(Allvotes[i]);
-          if (element == Number(window.userid)) isvoted = true;
+        setCurrentDAO(currentDao);
+        let allJoined = await GetAllJoined();
+        let currentJoined =  (allJoined).filter((e) => (e?.daoId) == (currentGoal.daoId.toString()))
+        let joinedInfo = currentJoined.filter((e)=>e?.user_id.toString() == window.userid.toString() )
+        if (joinedInfo.length > 0) {
+           setIsJoined(true);
+        }else{
+          setIsJoined(false);
         }
+        
+        // const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
+        // const object = JSON.parse(ideaURI); //Getting ideas uri
 
-        setAccountAddress(object.properties.wallet.description);
-        setPollIndex(object.properties?.Referenda?.description);
-        setIdeasURI({
-          ideasId: id,
-          Title: object.properties.Title.description,
-          Description: object.properties.Description.description,
-          Referenda: object.properties?.Referenda?.description,
-          wallet: object.properties.wallet.description,
-          logo: object.properties.logo.description?.url,
-          End_Date: goalURI.properties.End_Date?.description,
-          goalURI: goalURI,
-          daoURI: goalDAO,
-          user_info: await getUserInfoById(Number(object.properties.user_id.description)),
-          votesAmount: Object.keys(Allvotes).length,
-          donation: Number((await contract._ideas_uris(Number(id))).donation) / 1e18,
-          isVoted: isvoted,
-          isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
-          allfiles: object.properties.allFiles
-        });
+        // let isJoined = await contract.is_person_joined(Number(Goalid), Number(window.userid));
+        // setIsJoined(isJoined);
 
-        setimageList(object.properties.allFiles);
+        // const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
+        // const goalURI = JSON.parse(goalURIFull.goal_uri);
+        // let allDaos = await GetAllDaos();
+        // let goalDAO = allDaos.filter((e) => (e.daoId = goalURIFull.dao_id))[0];
+
+        // let isvoted = false;
+        // const AllvotesWithEmpty = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(id)); //Getting all votes
+        // const Allvotes = AllvotesWithEmpty.filter((item, idx) => item !== '');
+
+        // for (let i = 0; i < Allvotes.length; i++) {
+        //   const element = Number(Allvotes[i]);
+        //   if (element == Number(window.userid)) isvoted = true;
+        // }
+
+        setAccountAddress(currentIdea.wallet);
+        setIdeasURI(currentIdea)
+        // setIdeasURI({
+        //   ideasId: id,
+        //   Title: object.properties.Title.description,
+        //   Description: object.properties.Description.description,
+        //   Referenda: object.properties?.Referenda?.description,
+        //   wallet: object.properties.wallet.description,
+        //   logo: object.properties.logo.description?.url,
+        //   End_Date: goalURI.properties.End_Date?.description,
+        //   goalURI: goalURI,
+        //   daoURI: goalDAO,
+        //   user_info: await getUserInfoById(Number(object.properties.user_id.description)),
+        //   votesAmount: Object.keys(Allvotes).length,
+        //   donation: Number((await contract._ideas_uris(Number(id))).donation) / 1e18,
+        //   isVoted: isvoted,
+        //   isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
+        //   allfiles: object.properties.allFiles
+        // });
+
+        setimageList(currentIdea.allfiles);
         setLoading(false);
 
         // Comments and Replies
@@ -304,11 +327,11 @@ export default function GrantIdeas() {
                 element={
                   <h5 className="font-semibold">
                     <Link href={`../../../../${router.query.daoId}`} className="text-piccolo">
-                      {IdeasURI?.daoURI?.Title}
+                      {CurrentDAO?.Title}
                     </Link>{' '}
                     &gt;{' '}
                     <Link className="text-piccolo" href={`../../../../${router.query.daoId}/goal/${router.query.goalId}`}>
-                      {IdeasURI?.goalURI?.properties?.Title?.description}
+                      {IdeasURI?.goalURI?.Title}
                     </Link>{' '}
                     &gt; {IdeasURI?.Title}
                   </h5>
