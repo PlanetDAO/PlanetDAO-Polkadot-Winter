@@ -277,7 +277,7 @@ export default function DAO() {
         </div>
         {tabIndex === 0 && (
           <div className="container flex gap-6">
-            <CommunityFeed communityName={DaoURI.Title} daoId={daoIdTxt} /> <TopCommunityMembers allJoined={joinedCommunities} daoId={daoIdTxt} />
+            <CommunityFeed communityName={DaoURI.Title} daoId={daoIdTxt} /> <TopCommunityMembers allJoined={communityMembers} daoId={daoIdTxt} />
           </div>
         )}
         {tabIndex === 1 && <div className="container" dangerouslySetInnerHTML={{ __html: aboutTemplate }}></div>}

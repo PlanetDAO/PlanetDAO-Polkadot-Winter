@@ -47,7 +47,7 @@ const CommunitySwitcher = ({ title, daoId }: { title: string; daoId: string }) =
   }
 
   return (
-    <Dropdown value={null} onChange={null}>
+    <Dropdown value={null} onChange={null} disabled={!(title && list.length > 1)}>
       <Dropdown.Trigger className="flex items-center gap-1">
         <h1 className="text-moon-32 font-bold">{title}</h1>
         {title && list.length > 1 && <ControlsChevronDown className="text-piccolo" fontSize={32} />}
