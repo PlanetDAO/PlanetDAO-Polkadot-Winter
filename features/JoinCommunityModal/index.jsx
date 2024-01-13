@@ -4,6 +4,7 @@ import Alert from '@mui/material/Alert';
 import useContract from '../../services/useContract';
 import { useUtilsContext } from '../../contexts/UtilsContext';
 import { usePolkadotContext } from '../../contexts/PolkadotContext';
+import vTokenAbi from '../../services/json/vTokenABI.json';
 import { sendTransfer } from '../../services/wormhole/useSwap';
 import { Button, IconButton, Dropdown, MenuItem, Modal } from '@heathmont/moon-core-tw';
 import { ControlsClose } from '@heathmont/moon-icons-tw';
@@ -133,8 +134,14 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
       const Web3 = require('web3');
       const web3 = new Web3(window.ethereum);
       let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleUpperCase());
-      let token = getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;
-      setCoin(token);
+      
+      if (Coin !== 'DEV') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        const tokenInst = new ethers.Contract(vTokenAbi.address, vTokenAbi.abi, provider);
+
+        Balance = await tokenInst.balanceOf(window?.ethereum?.selectedAddress);
+      }
 
       setBalance(Number((Balance / 1000000000000000000).toPrecision(5)));
       let UsdEchangePrice = await getUSDPriceForChain();
@@ -202,6 +209,9 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
                     </Dropdown.Option>
                     <Dropdown.Option value="DEV">
                       <MenuItem>DEV</MenuItem>
+                    </Dropdown.Option>
+                    <Dropdown.Option value="xcvGLMR">
+                      <MenuItem>xcvGLMR</MenuItem>
                     </Dropdown.Option>
                     <Dropdown.Option value="tBNB">
                       <MenuItem>BNB</MenuItem>

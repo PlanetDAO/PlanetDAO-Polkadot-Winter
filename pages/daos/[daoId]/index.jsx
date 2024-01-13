@@ -284,7 +284,7 @@ export default function DAO() {
             <CommunityFeed communityName={DaoURI.Title} daoId={daoIdTxt} /> <TopCommunityMembers goals={list} allJoined={communityMembers} daoId={daoIdTxt} />
           </div>
         )}
-        {tabIndex === 1 && <div className="container template-container" ></div>}
+        {tabIndex === 1 && <div className="template-container mt-[-2rem]" style={{'width':'100%'}}></div>}
         {tabIndex === 2 && (
           <div className="flex flex-col gap-8 container items-center pb-10">
             <Loader element={list.length > 0 ? list.map((listItem, index) => <GoalCard item={listItem} key={index} />) : <EmptyState icon={<SportDarts className="text-moon-48" />} label="This community doesn’t have any goals yet." />} width={768} height={236} many={3} loading={loading} />{' '}
