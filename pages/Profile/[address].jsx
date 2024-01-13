@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import useContract from '../../services/useContract';
 import { Avatar, Button, IconButton, Tabs } from '@heathmont/moon-core-tw';
-import { ChatChat, ChatCommentText, FilesGeneric, GenericHeart, GenericIdea, GenericUser, GenericUsers, ShopWallet, SoftwareLogOut, SportDarts } from '@heathmont/moon-icons-tw';
+import { ChatChat, ChatCommentText, ControlsExpandAlt, FilesGeneric, GenericHeart, GenericIdea, GenericUser, GenericUsers, ShopWallet, SoftwareLogOut, SportDarts } from '@heathmont/moon-icons-tw';
 import SummaryPanel from '../../features/SummaryPanel';
 import Card from '../../components/components/Card';
 import Badge from '../../components/components/Badge';
@@ -15,7 +15,7 @@ export default function Profile() {
   //Variables
   const { contract } = useContract();
 
-  const { api, getUserInfoById, GetAllDaos,GetAllIdeas,GetAllGoals,GetAllJoined, GetAllVotes,GetAllUserDonations, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, getUserInfoById, GetAllDaos, GetAllIdeas, GetAllGoals, GetAllJoined, GetAllVotes, GetAllUserDonations, PolkadotLoggedIn } = usePolkadotContext();
   const [Donated, setDonated] = useState([]);
   const [UserBadges, setUserBadges] = useState({
     dao: false,
@@ -78,14 +78,12 @@ export default function Profile() {
       }
     }
 
-
-
     let founddao = [];
     for (let i = 0; i < allDaos.length; i++) {
       let dao_info = allDaos[i];
       if (dao_info.user_id == user_id) {
         dao_info.id = i;
-        let goal = allGoals.filter(e=>e.daoId == dao_info.daoId);
+        let goal = allGoals.filter((e) => e.daoId == dao_info.daoId);
         dao_info.goals = goal;
 
         founddao.push(dao_info);
@@ -95,23 +93,21 @@ export default function Profile() {
       return b.goals.length - a.goals.length;
     });
 
-   
-    let foundidea= allIdeas.filter(e=>Number(e.user_id)==Number(user_id));
+    let foundidea = allIdeas.filter((e) => Number(e.user_id) == Number(user_id));
 
     foundidea.sort(function (a, b) {
       return b.votes - a.votes;
     });
 
-    let foundGoals = allGoals.filter((e) => Number(e.UserId)==Number(user_id));
-    let donated =  allDonations[user_id.toString()];
+    let foundGoals = allGoals.filter((e) => Number(e.UserId) == Number(user_id));
+    let donated = allDonations[user_id.toString()];
 
     allBadges['dao'] = founddao.length > 0 ? true : false;
-    allBadges['joined'] = allJoined.filter((e) => Number(e.user_id)==Number(user_id)).length > 0 ? true : false;
+    allBadges['joined'] = allJoined.filter((e) => Number(e.user_id) == Number(user_id)).length > 0 ? true : false;
     allBadges['goal'] = foundGoals.length > 0 ? true : false;
     allBadges['ideas'] = foundidea.length > 0 ? true : false;
-    allBadges['vote'] = allVotes.filter((e) => Number(e.user_id)==Number(user_id)).length > 0 ? true : false;
-    allBadges['donation'] = donated> 0 ? true : false;
-
+    allBadges['vote'] = allVotes.filter((e) => Number(e.user_id) == Number(user_id)).length > 0 ? true : false;
+    allBadges['donation'] = donated > 0 ? true : false;
 
     let _donations_ids = await contract._donations_ids();
     let ideasURIS = [];
@@ -192,14 +188,22 @@ export default function Profile() {
 
     setStats({
       daosCreated: founddao.length,
-      goalsCreated: foundGoals.length,      
+      goalsCreated: foundGoals.length,
       ideasCreated: foundidea.length,
-      donated:donated
+      donated: donated
     });
 
     setAllMessages(allMessages);
 
     setLoading(false);
+  }
+
+  function goToFaucet() {
+    if (localStorage.getItem('login-type') === 'polkadot') {
+      window.open('https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fplanetdao.net%3A9933#/accounts', '_ blank');
+    } else if (localStorage.getItem('login-type') == 'metamask') {
+      window.open('https://faucet.moonbeam.network/', '_ blank');
+    }
   }
 
   function logout() {
@@ -243,12 +247,16 @@ export default function Profile() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            {loggedUser ? (
+            {loggedUser && (
+              <Button iconLeft={<ControlsExpandAlt />} onClick={goToFaucet}>
+                Add coin
+              </Button>
+            )}
+
+            {loggedUser && (
               <Button variant="secondary" iconLeft={<SoftwareLogOut />} onClick={logout}>
                 Log out
               </Button>
-            ) : (
-              <></>
             )}
           </div>
         </div>

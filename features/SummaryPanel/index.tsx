@@ -5,13 +5,10 @@ import GoalCard from '../../components/components/GoalCard';
 import IdeaCard from '../../components/components/IdeaCard';
 import { useEffect, useState } from 'react';
 import useEnvironment from '../../services/useEnvironment';
-
-const mockDaos = [
-  {
-    Title: 'Harvard University',
-    SubsPrice: 0.001
-  }
-] as any[];
+import { Dao } from '../../data-model/dao';
+import { JOINED } from '../../data-model/joined';
+import useContract from '../../services/useContract';
+import { usePolkadotContext } from '../../contexts/PolkadotContext';
 
 const mockGoals = [
   {
@@ -28,10 +25,40 @@ const mockIdeas = [
 
 const SummaryPanel = ({ stats }: { stats: ProfileStats }) => {
   const [currency, setCurrency] = useState('');
+  const { api, GetAllDaos, GetAllJoined } = usePolkadotContext();
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { contract } = useContract();
 
   useEffect(() => {
     setCurrency(useEnvironment.getCurrency());
-  }, []);
+    fetchContractData();
+  }, [contract, api]);
+
+  async function fetchContractData() {
+    setLoading(true);
+    //Fetching data from Smart contract
+    try {
+      if (contract && api) {
+        let allDaos = (await GetAllDaos()) as any as Dao[];
+        let allJoined = (await GetAllJoined()) as any as JOINED[];
+
+        const arrList = [];
+
+        allJoined.forEach((joined_dao) => {
+          let foundDao = (allDaos as any).filter((e) => e?.daoId == joined_dao.daoId.toString());
+          if (joined_dao.user_id.toString() == (window as any).userid.toString() && foundDao.length > 0) {
+            arrList.push(foundDao[0]);
+          }
+        });
+
+        setList(arrList.reverse());
+      }
+    } catch (error) {}
+
+    setLoading(false);
+  }
 
   return (
     <div className="w-full flex flex-col gap-10">
@@ -45,7 +72,7 @@ const SummaryPanel = ({ stats }: { stats: ProfileStats }) => {
           </Tabs.List>
           <Tabs.Panels>
             <Tabs.Panel>
-              {mockDaos.map((dao, index) => (
+              {list.map((dao, index) => (
                 <DAOCard key={index} item={dao} hasJoined className="shadow-none border border-beerus" />
               ))}
             </Tabs.Panel>

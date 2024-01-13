@@ -14,7 +14,7 @@ import { ControlsClose } from '@heathmont/moon-icons-tw';
 import UseFormInput from '../../components/components/UseFormInput';
 import { toast } from 'react-toastify';
 
-export default function DonateCoin({ ideasid, goalURI, show, onHide, address, recieveWallet,recievetype }) {
+export default function DonateCoin({ ideasid, goalURI, show, onHide, address, recieveWallet, recievetype }) {
   const [Balance, setBalance] = useState('');
   const { userInfo, PolkadotLoggedIn, userWalletPolkadot, userSigner, showToast, api } = usePolkadotContext();
   const [CurrentChain, setCurrentChain] = useState('');
@@ -93,22 +93,25 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
 
       onHide({ success: true });
     }
-    if (Coin == "DOT") {
-    
-      let recipient =  recievetype == "Polkadot" ? recieveWallet: address;
-      const txs = [
-        api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
-        api._extrinsics.ideas.addDonation(ideasid,`${Amount * 1e12}`,  Number(window.userid)),
-        api._extrinsics.feeds.addFeed( feed2,"donation",new Date().valueOf())        
-      ];
-
+    if (Coin == 'DOT') {
+      let recipient = recievetype == 'Polkadot' ? recieveWallet : address;
+      const txs = [api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`), api._extrinsics.ideas.addDonation(ideasid, `${Amount * 1e12}`, Number(window.userid)), api._extrinsics.feeds.addFeed(feed2, 'donation', new Date().valueOf())];
 
       const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, ShowAlert, 'Donation successful!', () => { onSuccess() },true,null,true);
+        showToast(
+          status,
+          ShowAlert,
+          'Donation successful!',
+          () => {
+            onSuccess();
+          },
+          true,
+          null,
+          true
+        );
       });
-
     } else {
-      let recipient = recievetype == "Polkadot" ? address : recieveWallet;
+      let recipient = recievetype == 'Polkadot' ? address : recieveWallet;
       if (Number(window.ethereum.networkVersion) === 1287) {
         //If it is sending from Moonbase so it will use batch precompiles
         ShowAlert('pending', 'Sending Batch Transaction....');
@@ -123,22 +126,16 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
         });
 
         // Saving Donation count on smart contract
-        ShowAlert('pending', 'Saving information....');    
+        ShowAlert('pending', 'Saving information....');
         await sendTransaction(await window.contract.populateTransaction.add_donation(ideasid, `${Amount * 1e18}`, Number(window.userid), feed1, feed2));
         ShowAlert('success', 'Success!');
       }
     }
-
-
-
   }
-
-
 
   async function LoadData(currencyChanged = false) {
     async function setPolkadot() {
-      if (Coin !== "DOT")
-        setCoin("DOT");
+      if (Coin !== 'DOT') setCoin('DOT');
       const { nonce, data: balance } = await api.query.system.account(userWalletPolkadot);
       setBalance(Number(balance.free.toString()) / 1e12);
     }
@@ -161,30 +158,24 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
       setCurrentChainNetwork(Number(window.ethereum.networkVersion));
       setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
     }
-    
 
-
-    if (PolkadotLoggedIn && currencyChanged == false && Coin == "") {
+    if (PolkadotLoggedIn && currencyChanged == false && Coin == '') {
       setPolkadot();
-
-    } else if (currencyChanged == true && Coin == "DOT") {
-      await switchNetworkByToken(Coin)
+    } else if (currencyChanged == true && Coin == 'DOT') {
+      await switchNetworkByToken(Coin);
       setPolkadot();
-    } else if (currencyChanged == true && Coin !== "DOT" && Coin !== "") {
-      await switchNetworkByToken(Coin)
-      setMetamask()
+    } else if (currencyChanged == true && Coin !== 'DOT' && Coin !== '') {
+      await switchNetworkByToken(Coin);
+      setMetamask();
     }
-
-
   }
 
   function isInvalid() {
     return !Amount;
   }
   useEffect(() => {
-    if (Coin !== "")
-      LoadData(true);
-  }, [Coin])
+    if (Coin !== '') LoadData(true);
+  }, [Coin]);
 
   useEffect(() => {
     LoadData();
@@ -238,7 +229,6 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
                       <Dropdown.Option value="GoerliETH">
                         <MenuItem>ETH</MenuItem>
                       </Dropdown.Option>
-
                     </Dropdown.Options>
                   </Dropdown>
                 </div>
