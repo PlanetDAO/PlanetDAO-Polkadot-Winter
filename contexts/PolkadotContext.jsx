@@ -547,10 +547,10 @@ export function PolkadotProvider({ children }) {
     //Fetching data from Parachain
     try {
       if (api) {
-        let totalVotesCount = Number(await api._query.daos.votoesIds());
+        let totalVotesCount = Number(await api._query.ideas.votoesIds());
         let arr = [];
         for (let i = 0; i < totalVotesCount; i++) {
-          const element = await api._query.daos.VoteById(i);
+          const element = await api._query.ideas.VoteById(i);
           let newElm = {
             id: element['__internal__raw'].id.toString(),
             goalId: element['__internal__raw'].goalId.toString(),
