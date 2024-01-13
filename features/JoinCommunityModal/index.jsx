@@ -64,7 +64,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
     setisLoading(true);
     const id = toast.loading('Joining Community ...');
     let feed = JSON.stringify({
-      daoId:daoId,
+      daoId: daoId,
       name: userInfo?.fullName?.toString()
     });
     async function onSuccess() {
@@ -73,26 +73,21 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
       setisLoading(false);
       onHide({ success: true });
     }
-    if (Coin == "DOT") {
+    if (Coin == 'DOT') {
       toast.update(id, {
         render: 'Joining Community....',
         type: 'pending'
       });
-      let recipient =  recievetype == "Polkadot" ? recieveWallet: address;
-      const txs = [
-        api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
-        api._extrinsics.daos.joinCommunity(daoId, Number(window.userid), (new Date()).toLocaleDateString(), feed),
-        api._extrinsics.feeds.addFeed( feed,"join",new Date().valueOf())
-        
-      ];
+      let recipient = recievetype == 'Polkadot' ? recieveWallet : address;
+      const txs = [api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`), api._extrinsics.daos.joinCommunity(daoId, Number(window.userid), new Date().toLocaleDateString(), feed), api._extrinsics.feeds.addFeed(feed, 'join', new Date().valueOf())];
 
       const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
-        showToast(status, id, 'Joined successfully!', () => { onSuccess() });
+        showToast(status, id, 'Joined successfully!', () => {
+          onSuccess();
+        });
       });
-
-
     } else {
-      let recipient = recievetype == "Polkadot" ? address : recieveWallet;
+      let recipient = recievetype == 'Polkadot' ? address : recieveWallet;
       if (Number(window.ethereum.networkVersion) === 1287) {
         toast.update(id, {
           render: 'Sending Batch Transaction....',
@@ -109,7 +104,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
           closeOnClick: true,
           draggable: true
         });
-        onSuccess()
+        onSuccess();
       } else {
         let output = await sendTransfer(Number(window.ethereum.networkVersion), `${Number(Amount)}`, recipient, ShowAlert);
         setTransaction({
@@ -122,16 +117,13 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
         onSuccess();
       }
     }
-
-
-
   }
 
   async function LoadData(currencyChanged = false) {
     async function setPolkadot() {
       let usdPerDot = await getUSDPriceForDot();
-      setToken("DOT");
-      setCoin("DOT");
+      setToken('DOT');
+      setCoin('DOT');
       let amount = SubsPrice / Number(usdPerDot);
       setAmount(amount.toPrecision(5));
       const { nonce, data: balance } = await api.query.system.account(userWalletPolkadot);
@@ -151,22 +143,18 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
     }
 
     if (PolkadotLoggedIn && currencyChanged == false) {
-
       setPolkadot();
-
-    } else if (currencyChanged == true && Coin == "DOT") {
-      await switchNetworkByToken(Coin)
+    } else if (currencyChanged == true && Coin == 'DOT') {
+      await switchNetworkByToken(Coin);
       setPolkadot();
-    } else if (currencyChanged == true && Coin !== "DOT") {
-      await switchNetworkByToken(Coin)
-      setMetamask()
+    } else if (currencyChanged == true && Coin !== 'DOT') {
+      await switchNetworkByToken(Coin);
+      setMetamask();
     }
-
   }
   useEffect(() => {
-    if (Coin !== "")
-      LoadData(true);
-  }, [Coin])
+    if (Coin !== '') LoadData(true);
+  }, [Coin]);
 
   useEffect(() => {
     LoadData();
@@ -194,26 +182,18 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
           </div>
 
           <div className="flex flex-col gap-3 w-full p-8">
-
             <div className="flex justify-between pt-8">
               <h4 className="font-semibold text-moon-18">Total</h4>
-              <h4 className="font-semibold text-moon-18">
-                {SubsPrice} USD
-              </h4>
+              <h4 className="font-semibold text-moon-18">{SubsPrice} USD</h4>
             </div>
 
             <div className="flex justify-between">
-              <h4 className="font-semibold text-moon-18">
-                Coin
-              </h4>
-              <h4 className="font-semibold text-moon-18">
-              </h4>
-              <div className='flex items-center gap-2'>
+              <h4 className="font-semibold text-moon-18">Coin</h4>
+              <h4 className="font-semibold text-moon-18"></h4>
+              <div className="flex items-center gap-2">
                 {Amount}
                 <Dropdown value={Coin} onChange={setCoin}>
-                  <Dropdown.Select placeholder={"Select a token"} >
-                    {Coin}
-                  </Dropdown.Select>
+                  <Dropdown.Select placeholder={'Select a currency'}>{Coin}</Dropdown.Select>
                   <Dropdown.Options className="bg-gohan w-48 min-w-0 w-full">
                     <Dropdown.Option value="DOT">
                       <MenuItem>DOT</MenuItem>
@@ -232,7 +212,6 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
                     </Dropdown.Option>
                   </Dropdown.Options>
                 </Dropdown>
-
               </div>
             </div>
 
