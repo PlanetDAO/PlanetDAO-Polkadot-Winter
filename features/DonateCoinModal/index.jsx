@@ -12,11 +12,11 @@ import { sendTransfer } from '../../services/wormhole/useSwap';
 import { Button, Dropdown, IconButton, Modal } from '@heathmont/moon-core-tw';
 import { ControlsClose } from '@heathmont/moon-icons-tw';
 import UseFormInput from '../../components/components/UseFormInput';
-import Required from '../../components/components/Required';
+import { toast } from 'react-toastify';
 
-export default function DonateCoin({ ideasid, show, onHide, address }) {
+export default function DonateCoin({ ideasid, goalURI, show, onHide, address, recieveWallet,recievetype }) {
   const [Balance, setBalance] = useState('');
-  const { userInfo } = usePolkadotContext();
+  const { userInfo, PolkadotLoggedIn, userWalletPolkadot, userSigner, showToast, api } = usePolkadotContext();
   const [CurrentChain, setCurrentChain] = useState('');
   const [CurrentChainNetwork, setCurrentChainNetwork] = useState(0);
   const [CurrentAddress, setCurrentAddress] = useState('');
@@ -31,7 +31,7 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
     token: ''
   });
 
-  const { BatchDonate } = useUtilsContext();
+  const { BatchDonate, switchNetworkByToken } = useUtilsContext();
 
   const [Amount, AmountInput] = UseFormInput({
     defaultValue: '',
@@ -72,70 +72,122 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
     setisSent(false);
     alertBox = e.target.querySelector('[name=alertbox]');
     setisLoading(true);
+    ShowAlert('pending', 'Donating ...');
+
     let feed1 = JSON.stringify({
       name: userInfo?.fullName?.toString(),
       badge: 'First Donation'
     });
 
-    const ideaURI = await contract.ideas_uri(Number(ideasid)); //Getting ideas uri
-    let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-    const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
-    const goalURI = JSON.parse(goalURIFull.goal_uri);
-
     let feed2 = JSON.stringify({
       donated: Amount,
-      goalTitle: goalURI.properties.Title.description,
-      ideasid: Number(ideasid)
+      goalTitle: goalURI.Title,
+      ideasid: ideasid
     });
-    if (Number(window.ethereum.networkVersion) === 1287) {
-      //If it is sending from Moonbase so it will use batch precompiles
-      ShowAlert('pending', 'Sending Batch Transaction....');
-      await BatchDonate(Amount, address, Number(ideasid), Coin, feed1, feed2);
 
-      ShowAlert('success', 'Donation success!');
-    } else {
-      let output = await sendTransfer(Number(window.ethereum.networkVersion), Amount, address, ShowAlert);
-      setTransaction({
-        link: output.transaction,
-        token: output?.wrappedAsset
-      });
-      // Saving Donation count on smart contract
-      await sendTransaction(await window.contract.populateTransaction.add_donation(Number(ideasid), `${Amount * 1e18}`, Number(window.userid), feed1, feed2));
+    async function onSuccess() {
+      window.location.reload();
+      LoadData();
+      setisLoading(false);
+      setisSent(true);
+
+      onHide({ success: true });
     }
-    window.location.reload();
-    LoadData();
-    setisLoading(false);
-    setisSent(true);
+    if (Coin == "DOT") {
+    
+      let recipient =  recievetype == "Polkadot" ? recieveWallet: address;
+      const txs = [
+        api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
+        api._extrinsics.ideas.addDonation(ideasid,`${Amount * 1e12}`,  Number(window.userid)),
+        api._extrinsics.feeds.addFeed( feed2,"donation",new Date().valueOf())        
+      ];
 
-    onHide({ success: true });
+
+      const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, ShowAlert, 'Donation successful!', () => { onSuccess() },true,null,true);
+      });
+
+    } else {
+      let recipient = recievetype == "Polkadot" ? address : recieveWallet;
+      if (Number(window.ethereum.networkVersion) === 1287) {
+        //If it is sending from Moonbase so it will use batch precompiles
+        ShowAlert('pending', 'Sending Batch Transaction....');
+        await BatchDonate(Amount, recipient, Number(ideasid), Coin, feed1, feed2);
+
+        ShowAlert('success', 'Donation success!');
+      } else {
+        let output = await sendTransfer(Number(window.ethereum.networkVersion), Amount, recipient, ShowAlert);
+        setTransaction({
+          link: output.transaction,
+          token: output?.wrappedAsset
+        });
+
+        // Saving Donation count on smart contract
+        ShowAlert('pending', 'Saving information....');    
+        await sendTransaction(await window.contract.populateTransaction.add_donation(ideasid, `${Amount * 1e18}`, Number(window.userid), feed1, feed2));
+        ShowAlert('success', 'Success!');
+      }
+    }
+
+
+
   }
 
-  async function LoadData() {
-    const Web3 = require('web3');
-    const web3 = new Web3(window.ethereum);
-    let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
-    let token = ' ' + Coin;
-    if (Coin !== 'DEV') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-      const tokenInst = new ethers.Contract(vTokenAbi.address, vTokenAbi.abi, provider);
 
-      Balance = await tokenInst.balanceOf(window?.ethereum?.selectedAddress);
+  async function LoadData(currencyChanged = false) {
+    async function setPolkadot() {
+      if (Coin !== "DOT")
+        setCoin("DOT");
+      const { nonce, data: balance } = await api.query.system.account(userWalletPolkadot);
+      setBalance(Number(balance.free.toString()) / 1e12);
     }
 
-    setBalance((Balance / 1000000000000000000).toFixed(5) + token);
-    setCurrentChain(getChain(Number(window.ethereum.networkVersion)).name);
-    setCurrentChainNetwork(Number(window.ethereum.networkVersion));
-    setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+    async function setMetamask() {
+      const Web3 = require('web3');
+      const web3 = new Web3(window.ethereum);
+      let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+
+      if (Coin !== 'DEV') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        const tokenInst = new ethers.Contract(vTokenAbi.address, vTokenAbi.abi, provider);
+
+        Balance = await tokenInst.balanceOf(window?.ethereum?.selectedAddress);
+      }
+
+      setBalance((Balance / 1000000000000000000).toFixed(5));
+      setCurrentChain(getChain(Number(window.ethereum.networkVersion)).name);
+      setCurrentChainNetwork(Number(window.ethereum.networkVersion));
+      setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+    }
+
+
+    if (PolkadotLoggedIn && currencyChanged == false) {
+      setPolkadot();
+
+    } else if (currencyChanged == true && Coin == "DOT") {
+      await switchNetworkByToken(Coin)
+      setPolkadot();
+    } else if (currencyChanged == true && Coin !== "DOT") {
+      await switchNetworkByToken(Coin)
+      setMetamask()
+    }
+
+
   }
 
   function isInvalid() {
     return !Amount;
   }
+  useEffect(() => {
+    if (Coin !== "")
+      LoadData(true);
+  }, [Coin])
 
   useEffect(() => {
     LoadData();
-  }, [show, Coin]);
+  }, [show]);
 
   return (
     <Modal open={show} onClose={onHide}>
@@ -167,12 +219,25 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
                   <Dropdown value={Coin} onChange={setCoin} className="max-w-[100px]">
                     <Dropdown.Select>{Coin}</Dropdown.Select>
                     <Dropdown.Options className="bg-gohan w-48 min-w-0">
+                      <Dropdown.Option value="DOT">
+                        <MenuItem>DOT</MenuItem>
+                      </Dropdown.Option>
                       <Dropdown.Option value="DEV">
                         <MenuItem>DEV</MenuItem>
                       </Dropdown.Option>
                       <Dropdown.Option value="xcvGLMR">
                         <MenuItem>xcvGLMR</MenuItem>
                       </Dropdown.Option>
+                      <Dropdown.Option value="tBNB">
+                        <MenuItem>BNB</MenuItem>
+                      </Dropdown.Option>
+                      <Dropdown.Option value="CELO">
+                        <MenuItem>CELO</MenuItem>
+                      </Dropdown.Option>
+                      <Dropdown.Option value="GoerliETH">
+                        <MenuItem>ETH</MenuItem>
+                      </Dropdown.Option>
+
                     </Dropdown.Options>
                   </Dropdown>
                 </div>
@@ -180,13 +245,6 @@ export default function DonateCoin({ ideasid, show, onHide, address }) {
                 <p className="text-trunks w-full text-right">Your balance is {Balance} </p>
               </div>
 
-              {/* <div className="flex flex-col gap-2 p-6 pt-3">
-                <h6>
-                  Amount
-                  <Required />
-                </h6>
-              </div>
- */}
               <div className="flex justify-between border-t border-beerus w-full p-6">
                 <Button variant="ghost" onClick={onHide}>
                   Cancel

@@ -18,7 +18,7 @@ import CommunitySwitcher from './CommunitySwitcher';
 export default function DAO() {
   //Variables
   const [list, setList] = useState([]);
-  const { api, showToast, getUserInfoById, PolkadotLoggedIn, GetAllJoined, GetAllGoals } = usePolkadotContext();
+  const { api, showToast, getUserInfoById, PolkadotLoggedIn,GetAllVotes,GetAllIdeas, GetAllJoined, GetAllGoals } = usePolkadotContext();
   const [DaoURI, setDaoURI] = useState({ Title: '', Description: '', SubsPrice: 0, Start_Date: '', End_Date: '', logo: '', wallet: '', typeimg: '', allFiles: [], isOwner: false });
   const [daoIdTxt, setDaoTxtID] = useState('');
   const [daoId, setDaoID] = useState(-1);
@@ -161,39 +161,23 @@ export default function DAO() {
 
         const arr = [];
         for (let i = 0; i < currentGoals.length; i++) {
-          //total goal number Iteration
-          arr.push(currentGoals[i]);
+          let goalElm = currentGoals[i];
+          //All Ideas Count
+          let allIdeas = await GetAllIdeas();
+          let goalIdeas = allIdeas.filter(e=>e?.goalId.toString() == goalElm.goalId.toString())
+          goalElm.ideasCount = goalIdeas.length;
 
-          // const goalid = Number(await contract.get_goal_id_by_goal_uri(totalGoals[i]));
-          // let goal = totalGoals[i].toString();
-          // if (goal == '') continue;
-          // const object = JSON.parse(goal);
+          
+          //All Votes Count
+          let allIdeasVotes = await GetAllVotes();
+          let goalvotes = allIdeasVotes.filter(e=>e?.goalId.toString() == goalElm.goalId.toString())
+          goalElm.votesCount = goalvotes.length;
 
-          // if (object) {
-          //   const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(goalid)); //Getting total goal (Number)
 
-          //   let total_reached = 0;
-          //   let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
-          //   for (let i = 0; i < totalIdeas.length; i++) {
-          //     const element = totalIdeas[i];
+       
 
-          //     const ideasId = await contract.get_ideas_id_by_ideas_uri(element);
-          //     let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
-          //     total_reached += donation;
-          //   }
 
-          //   arr.push({
-          //     //Pushing all data into array
-          //     goalId: goalid,
-          //     Title: object.properties.Title.description,
-          //     Description: object.properties.Description.description,
-          //     Budget: object.properties.Budget.description,
-          //     reached: total_reached,
-          //     End_Date: object.properties.End_Date.description,
-          //     logo: object.properties.logo.description?.url,
-          //     ideasCount: Object.keys(totalIdeas).filter((item, idx) => item !== '').length
-          // });
-          // }
+          arr.push(goalElm);
         }
 
         setLoading(false);
@@ -277,7 +261,7 @@ export default function DAO() {
         </div>
         {tabIndex === 0 && (
           <div className="container flex gap-6">
-            <CommunityFeed communityName={DaoURI.Title} daoId={daoIdTxt} /> <TopCommunityMembers allJoined={communityMembers} daoId={daoIdTxt} />
+            <CommunityFeed communityName={DaoURI.Title} daoId={daoIdTxt} /> <TopCommunityMembers goals={list} allJoined={communityMembers} daoId={daoIdTxt} />
           </div>
         )}
         {tabIndex === 1 && <div className="container" dangerouslySetInnerHTML={{ __html: aboutTemplate }}></div>}

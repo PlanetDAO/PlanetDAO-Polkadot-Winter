@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 const AppContext = createContext({
   api: null,
   deriveAcc: null,
-  showToast: (status, id, FinalizedText, doAfter, callToastSuccess = true, events) => { },
+  showToast: (status, id, FinalizedText, doAfter, callToastSuccess = true, events, toast) => { },
   userInfo: {},
   userWalletPolkadot: '',
   userSigner: null,
@@ -17,9 +17,12 @@ const AppContext = createContext({
   GetAllDaos: async () => { },
   GetAllJoined: async () => { },
   GetAllGoals: async () => { },
-  GetAllFeeds:async ()=>{},
-  GetAllIdeas:async ()=>{},
-    getUserInfoById: async (userid) => { },
+  GetAllFeeds: async () => { },
+  GetAllIdeas: async () => { },
+  GetAllVotes: async () => { },
+  GetAllDonations: async () => { },
+  GetAllUserDonations: async () => { },
+  getUserInfoById: async (userid) => { },
   updateCurrentUser: () => { }
 });
 
@@ -31,21 +34,35 @@ export function PolkadotProvider({ children }) {
   const [userWalletPolkadot, setUserWalletPolkadot] = useState('');
   const [userSigner, setUserSigner] = useState('');
 
-  async function showToast(status, id, FinalizedText, doAfter, callToastSuccess = true, events) {
+  async function showToast(status, IdOrShowAlert, FinalizedText, doAfter, callToastSuccess = true, events, ShowToast = false) {
     if (status.isInBlock) {
-      toast.update(id, { render: 'Transaction In block...', isLoading: true });
+      if (ShowToast == false) {
+      toast.update(IdOrShowAlert, { render: 'Transaction In block...', isLoading: true });
+      }else {
+        IdOrShowAlert('pending', 'Transaction In block...');
+      }
+
     } else if (status.isFinalized) {
       if (callToastSuccess)
-        toast.update(id, {
-          render: FinalizedText,
-          type: 'success',
-          isLoading: false,
-          autoClose: 1000,
-          closeButton: true,
-          closeOnClick: true,
-          draggable: true
-        });
-      doAfter(events);
+        if (ShowToast == false) {
+          toast.update(IdOrShowAlert, {
+            render: FinalizedText,
+            type: 'success',
+            isLoading: false,
+            autoClose: 1000,
+            closeButton: true,
+            closeOnClick: true,
+            draggable: true
+          });
+        } else {
+          IdOrShowAlert('success', FinalizedText);
+        }
+
+      if (events != null) {
+        doAfter(events);
+      } else {
+        doAfter();
+      }
     }
   }
 
@@ -111,6 +128,13 @@ export function PolkadotProvider({ children }) {
       } catch (e) { }
     })();
   }, []);
+
+  //One Time Counter
+
+  let allVotes = [];
+  let allDonations = [];
+  let allIdeas = [];
+  let allDaos = [];
 
   async function InsertData(totalDAOCount, allDAOs, prefix) {
     const arr = [];
@@ -222,7 +246,7 @@ export function PolkadotProvider({ children }) {
 
         return arr;
       }
-    } catch (error) { console.error(error)}
+    } catch (error) { console.error(error) }
     return [];
   }
   async function fetchContractJoinedData() {
@@ -265,12 +289,21 @@ export function PolkadotProvider({ children }) {
           daoId = allGoals[i].daoId.toString();
         }
       }
+      let goalId = prefix + i;
+  
+      let reached = 0;
+      let currentGoalIdeas = allIdeas.filter((e) => e.goalId == goalId)
+      for (let i = 0; i < currentGoalIdeas.length; i++) {
+        const element = (currentGoalIdeas[i]);
+        reached += element.donation;
+      }
+
 
       if (object) {
         arr.push({
           //Pushing all data into array
           id: i,
-          goalId: prefix + i,
+          goalId: goalId,
           daoId: daoId,
           Title: object.properties.Title.description,
           Description: object.properties.Description.description,
@@ -280,8 +313,8 @@ export function PolkadotProvider({ children }) {
           UserId: object.properties?.user_id?.description,
           logo: object.properties.logo.description?.url,
           type: prefix == 'm_' ? 'Polkadot' : 'EVM',
-          ideasCount: 0,
-          reached: 0,
+          ideasCount: currentGoalIdeas.length,
+          reached: reached,
         });
       }
     }
@@ -332,6 +365,7 @@ export function PolkadotProvider({ children }) {
     return [];
   }
   async function GetAllGoals() {
+    allIdeas = await GetAllIdeas();
     let arr = [];
     arr = arr.concat(await fetchPolkadotGoalData());
     arr = arr.concat(await fetchContractGoalData());
@@ -339,7 +373,7 @@ export function PolkadotProvider({ children }) {
   }
 
 
-  
+
   async function fetchPolkadotFeedsData() {
     //Fetching data from Parachain
     try {
@@ -350,7 +384,7 @@ export function PolkadotProvider({ children }) {
           const element = await api._query.feeds.feedById(i);
           let newElm = {
             id: element['__internal__raw'].feedId.toString(),
-            date:  new Date(Number(element['__internal__raw'].date)),
+            date: new Date(Number(element['__internal__raw'].date)),
             type: element['__internal__raw'].feedType.toString(),
             data: JSON.parse(element['__internal__raw'].data.toString())
           };
@@ -359,7 +393,7 @@ export function PolkadotProvider({ children }) {
 
         return arr;
       }
-    } catch (error) { console.error(error)}
+    } catch (error) { console.error(error) }
     return [];
   }
   async function fetchContractFeedsData() {
@@ -374,8 +408,8 @@ export function PolkadotProvider({ children }) {
           let newElm = {
             id: i,
             date: Date(Number(feed.date)),
-            type:feed.Type,
-            data:JSON.parse( feed.data)
+            type: feed.Type,
+            data: JSON.parse(feed.data)
           }
           arr.push(newElm);
         }
@@ -394,7 +428,7 @@ export function PolkadotProvider({ children }) {
   }
 
 
-  
+
   async function InsertIdeaData(totalIdeaCount, allIdeas, prefix) {
     const arr = [];
     for (let i = 0; i < totalIdeaCount; i++) {
@@ -409,22 +443,42 @@ export function PolkadotProvider({ children }) {
           goalId = allIdeas[i].goalId.toString();
         }
       }
+      let ideasId = prefix + i;
+
+      let isvoted = false;
+      let currentIdeasVotes = allVotes.filter((e) => e.ideasId == ideasId)
+      for (let i = 0; i < currentIdeasVotes.length; i++) {
+        const element = (currentIdeasVotes[i]);
+        if (Number(element.user_id) == Number(window.userid)) isvoted = true;
+      }
+
+      let votesAmount = currentIdeasVotes.length;
+
+      let totalDonation = 0;
+      let currentIdeasDonations = allDonations.filter((e) => e.ideasId == ideasId)
+      for (let i = 0; i < currentIdeasDonations.length; i++) {
+        const element = (currentIdeasDonations[i]);
+        totalDonation += element.donation;
+      }
 
       if (object) {
         arr.push({
           //Pushing all data into array
           id: i,
-          ideasId: prefix + i,
+          ideasId: ideasId,
           goalId: goalId,
           Title: object.properties.Title.description,
           Description: object.properties.Description.description,
           wallet: object.properties.wallet.description,
+          recieve_wallet: object.properties.recieve_wallet.description,
+          recievetype: prefix == 'm_' ? 'Polkadot' : 'EVM',
           logo: object.properties.logo.description?.url,
-          user_id: Number( object.properties.user_id.description),
+          Referenda: Number(object.properties.Referenda.description),
+          user_id: Number(object.properties.user_id.description),
           allfiles: object.properties.allFiles,
-          donation:0,
-          votes:0,
-          isVoted:false,
+          donation: totalDonation,
+          votes: votesAmount,
+          isVoted: isvoted,
           isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
 
           type: prefix == 'm_' ? 'Polkadot' : 'EVM',
@@ -478,6 +532,9 @@ export function PolkadotProvider({ children }) {
     return [];
   }
   async function GetAllIdeas() {
+    allVotes = await GetAllVotes();
+    allDonations = await GetAllDonations();
+
     let arr = [];
     arr = arr.concat(await fetchPolkadotIdeaData());
     arr = arr.concat(await fetchContractIdeaData());
@@ -486,7 +543,123 @@ export function PolkadotProvider({ children }) {
 
 
 
-  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc,GetAllGoals:GetAllGoals,GetAllIdeas:GetAllIdeas, GetAllFeeds:GetAllFeeds,updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
+  async function fetchPolkadotVotesData() {
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalVotesCount = Number(await api._query.daos.votoesIds());
+        let arr = [];
+        for (let i = 0; i < totalVotesCount; i++) {
+          const element = await api._query.daos.VoteById(i);
+          let newElm = {
+            id: element['__internal__raw'].id.toString(),
+            goalId: element['__internal__raw'].goalId.toString(),
+            ideasId: element['__internal__raw'].ideasId.toString(),
+            user_id: element['__internal__raw'].userId.toString()
+          };
+          arr.push(newElm);
+        }
+        return arr;
+      }
+    } catch (error) { console.error(error) }
+    return [];
+  }
+  async function fetchContractVotesData() {
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+        const totalVotes = await contract._ideas_vote_ids();
+
+        const arr = [];
+        for (let i = 0; i < Number(totalVotes); i++) {
+          const ideas_vote = await contract.all_goal_ideas_votes(i);
+          let newElm = {
+            id: i.toString(),
+            goalId: ideas_vote.goal_id.toString(),
+            ideasId: ideas_vote.ideas_id.toString(),
+            user_id: (ideas_vote.user_id).toString(),
+          };
+          arr.push(newElm);
+        }
+
+        return arr;
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllVotes() {
+
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotVotesData());
+    arr = arr.concat(await fetchContractVotesData());
+    return arr;
+  }
+
+  
+  async function fetchPolkadotDonationsData() {
+    //Fetching data from Parachain
+    try {
+      if (api) {
+        let totalDonationsCount = Number(await api._query.ideas.donationsIds());
+        let arr = [];
+        for (let i = 0; i < totalDonationsCount; i++) {
+          const element = await api._query.ideas.DonationsById(i);
+          let newElm = {
+            id: element['__internal__raw'].id.toString(),
+            ideasId: element['__internal__raw'].ideasId.toString(),
+            userid: element['__internal__raw'].userid.toString(),
+            donation: Number(element['__internal__raw'].donation.toString())/ 1e12,
+          };
+          arr.push(newElm);
+        }
+        return arr;
+      }
+    } catch (error) { console.error(error) }
+    return [];
+  }
+  async function fetchContractDonationsData() {
+    //Fetching data from Smart contract
+    try {
+      if (window.contract) {
+        const totalDonations = await contract._donations_ids();
+
+        const arr = [];
+        for (let i = 0; i < Number(totalDonations); i++) {
+          const ideas_donation = await contract._donations(i);
+          let newElm = {
+            id: i.toString(),
+            ideasId: ideas_donation.ideas_id.toString(),
+            userid: ideas_donation.userid.toString(),
+            donation: Number(ideas_donation.donation) / 1e18,
+          };
+          arr.push(newElm);
+        }
+
+        return arr;
+      }
+    } catch (error) { }
+
+    return [];
+  }
+  async function GetAllDonations() {
+
+    let arr = [];
+    arr = arr.concat(await fetchPolkadotDonationsData());
+    arr = arr.concat(await fetchContractDonationsData());
+    return arr;
+  }
+
+  async function GetAllUserDonations() {
+    let allDonations = await GetAllDonations();
+    let users = {};
+    allDonations.forEach((elm)=>{
+      users[elm.userid] = Number(users[elm.userid] ) + elm.donation;
+    })
+    return users;
+  }
+
+  return <AppContext.Provider value={{ api: api, deriveAcc: deriveAcc, GetAllGoals: GetAllGoals, GetAllIdeas: GetAllIdeas, GetAllVotes: GetAllVotes, GetAllFeeds: GetAllFeeds,GetAllDonations:GetAllDonations,GetAllUserDonations:GetAllUserDonations, updateCurrentUser: updateCurrentUser, GetAllDaos: GetAllDaos, GetAllJoined: GetAllJoined, showToast: showToast, EasyToast: EasyToast, getUserInfoById: getUserInfoById, userWalletPolkadot: userWalletPolkadot, userSigner: userSigner, PolkadotLoggedIn: PolkadotLoggedIn, userInfo: userInfo }}>{children}</AppContext.Provider>;
 }
 
 export const usePolkadotContext = () => useContext(AppContext);

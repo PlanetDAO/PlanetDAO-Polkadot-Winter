@@ -15,7 +15,7 @@ export default function Profile() {
   //Variables
   const { contract } = useContract();
 
-  const { api, getUserInfoById, GetAllDaos, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, getUserInfoById, GetAllDaos,GetAllIdeas,GetAllGoals,GetAllJoined, GetAllVotes,GetAllUserDonations, PolkadotLoggedIn } = usePolkadotContext();
   const [Donated, setDonated] = useState([]);
   const [UserBadges, setUserBadges] = useState({
     dao: false,
@@ -60,9 +60,14 @@ export default function Profile() {
     setUserInfo(user_info);
     //Fetching data from Smart contract
     let allDaos = await GetAllDaos();
-    let allIdeas = await contract.get_all_ideas();
-    let donated = Number(await contract._donated(Number(user_id))) / 1e18;
-    let allBadges = { ...(await contract._user_badges(user_id)) };
+    let allJoined = await GetAllJoined();
+    let allGoals = await GetAllGoals();
+    let allIdeas = await GetAllIdeas();
+    let allVotes = await GetAllVotes();
+    let allDonations = await GetAllUserDonations();
+
+    // let donated = Number(await contract._donated(Number(user_id))) / 1e18;
+    let allBadges = UserBadges;
 
     let total_read = 0;
     let _message_read_ids = await contract._message_read_ids();
@@ -73,17 +78,15 @@ export default function Profile() {
       }
     }
 
-    allBadges['dao'] = allDaos.filter((e) => e.user_id == user_id).length > 0 ? true : false;
+
 
     let founddao = [];
     for (let i = 0; i < allDaos.length; i++) {
       let dao_info = allDaos[i];
       if (dao_info.user_id == user_id) {
         dao_info.id = i;
-        let goal = await contract.get_all_goals_by_dao_id(i);
-        dao_info.goals = goal.filter((e) => {
-          return e !== '';
-        });
+        let goal = allGoals.filter(e=>e.daoId == dao_info.daoId);
+        dao_info.goals = goal;
 
         founddao.push(dao_info);
       }
@@ -91,27 +94,24 @@ export default function Profile() {
     founddao.sort(function (a, b) {
       return b.goals.length - a.goals.length;
     });
-    let foundidea = [];
 
-    for (let i = 0; i < allIdeas.length; i++) {
-      let idea_uri_json = allIdeas[i];
-
-      let goalid = Number(await contract.get_goal_id_from_ideas_uri(idea_uri_json));
-      let idea_uri = JSON.parse(idea_uri_json);
-      idea_uri.id = i;
-
-      if (idea_uri.properties.user_id.description == user_id) {
-        let votes = await contract.get_ideas_votes_from_goal(goalid, i);
-
-        idea_uri.votes = votes.filter((item, idx) => item !== '');
-
-        foundidea.push(idea_uri);
-      }
-    }
+   
+    let foundidea= allIdeas.filter(e=>Number(e.user_id)==Number(user_id));
 
     foundidea.sort(function (a, b) {
-      return b.votes.length - a.votes.length;
+      return b.votes - a.votes;
     });
+
+    let foundGoals = allGoals.filter((e) => Number(e.UserId)==Number(user_id));
+    let donated =  allDonations[user_id.toString()];
+
+    allBadges['dao'] = founddao.length > 0 ? true : false;
+    allBadges['joined'] = allJoined.filter((e) => Number(e.user_id)==Number(user_id)).length > 0 ? true : false;
+    allBadges['goal'] = foundGoals.length > 0 ? true : false;
+    allBadges['ideas'] = foundidea.length > 0 ? true : false;
+    allBadges['vote'] = allVotes.filter((e) => Number(e.user_id)==Number(user_id)).length > 0 ? true : false;
+    allBadges['donation'] = donated> 0 ? true : false;
+
 
     let _donations_ids = await contract._donations_ids();
     let ideasURIS = [];
@@ -191,9 +191,10 @@ export default function Profile() {
     setUserBadges(allBadges);
 
     setStats({
-      donated,
       daosCreated: founddao.length,
-      ideasCreated: foundidea.length
+      goalsCreated: foundGoals.length,      
+      ideasCreated: foundidea.length,
+      donated:donated
     });
 
     setAllMessages(allMessages);

@@ -7,6 +7,7 @@ export interface Goal {
   End_Date: Date;
   UserId?: Number;
   logo?: string;
-  ideasCount:Number;
+  ideasCount?:Number;
+  votesCount?:Number;
   reached?: Number
 }

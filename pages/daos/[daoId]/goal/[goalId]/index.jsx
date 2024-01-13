@@ -13,14 +13,15 @@ import Image from 'next/legacy/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import useEnvironment from '../../../../../services/useEnvironment';
+import { toast } from 'react-toastify';
 
 export default function Goal() {
   //Variables
   const [list, setList] = useState([]);
-  const { api, showToast,GetAllJoined, getUserInfoById, GetAllDaos,GetAllGoals, GetAllIdeas,PolkadotLoggedIn } = usePolkadotContext();
+  const { api, showToast, GetAllJoined, userWalletPolkadot,userSigner,getUserInfoById, GetAllDaos, GetAllGoals, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
   const [GoalURI, setGoalURI] = useState({
     goalId: '',
-    daoId:"",
+    daoId: "",
     Title: '',
     Description: '',
     Budget: '',
@@ -40,11 +41,12 @@ export default function Goal() {
   const [goalIdTxt, setGoalTxtID] = useState('');
   const [goalType, setGoalType] = useState('polkadot');
   const [GoalDAOURI, setGoalDAOURI] = useState({});
- 
+
   const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
   const [DonatemodalShow, setDonateModalShow] = useState(false);
-  const [selectedIdeasId, setSelectedIdeasId] = useState(-1);
+  const [selectedIdeasId, setSelectedIdeasId] = useState("");
   const [selectedIdeasWallet, setSelectedIdeasWallet] = useState('');
+  const [selectedIdeasRecieveWallet, setSelectedIdeasRecieveWallet] = useState('');
 
   const router = useRouter();
 
@@ -54,12 +56,12 @@ export default function Goal() {
     setCurrency(useEnvironment.getCurrency());
     getGoalID();
     fetchContractData();
-  }, [ api, router]);
+  }, [api, router]);
 
 
   function getGoalID() {
     const goalIdParam = router.query.goalId;
-   
+
     if (!goalIdParam) {
       return;
     }
@@ -78,9 +80,9 @@ export default function Goal() {
     setLoading(true);
 
     try {
-      if ( goalId != -1 && api) {
+      if (goalId != -1 && api) {
 
-        let allGoals =await GetAllGoals();
+        let allGoals = await GetAllGoals();
         let goalURIFull = (allGoals).filter((e) => (e?.goalId) == (goalIdTxt.toString()))[0];
 
 
@@ -90,11 +92,11 @@ export default function Goal() {
 
         let user_info = await getUserInfoById(Number(goalURIFull.UserId));
         let allJoined = await GetAllJoined();
-        let currentJoined =  (allJoined).filter((e) => (e?.daoId) == (goalURIFull.daoId.toString()))
-        let joinedInfo = currentJoined.filter((e)=>e?.user_id.toString() == window.userid.toString() )
+        let currentJoined = (allJoined).filter((e) => (e?.daoId) == (goalURIFull.daoId.toString()))
+        let joinedInfo = currentJoined.filter((e) => e?.user_id.toString() == window.userid.toString())
         if (joinedInfo.length > 0) {
-           setIsJoined(true);
-        }else{
+          setIsJoined(true);
+        } else {
           setIsJoined(false);
         }
 
@@ -102,8 +104,9 @@ export default function Goal() {
         // const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(id)); //Getting total goal (Number)
         // let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
         let arr = [];
-        let allIdeas = await GetAllIdeas(); 
-        arr = allIdeas;
+        let allIdeas = await GetAllIdeas();
+        let GoalIdeas = allIdeas.filter(e => e.goalId.toString() == goalIdTxt.toString())
+        arr = GoalIdeas;
         // let total_donated = 0;
         // for (let i = 0; i < Object.keys(totalIdeas).length; i++) {
         //   //total goal number Iteration
@@ -148,10 +151,11 @@ export default function Goal() {
       console.error('Could not load contract');
     }
   }
-  async function DonateToIdeas(ideasId, wallet) {
+  async function DonateToIdeas(ideasId, wallet, recieveWallet) {
     setDonateModalShow(true);
     setSelectedIdeasId(ideasId);
     setSelectedIdeasWallet(wallet);
+    setSelectedIdeasRecieveWallet(recieveWallet);
   }
 
   function closeCreateIdeaModal(event) {
@@ -164,16 +168,68 @@ export default function Goal() {
   }
 
   async function VoteIdea(ideas_id, index) {
-    try {
-      await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(Number(goalId), Number(ideas_id), Number(window.userid)));
-    } catch (error) {
-      console.error(error);
+
+    let IdeasURI  = list[index];
+    if (IdeasURI.Referenda != 0) {
+      setVotingShow(true);
       return;
     }
-    let idealist = list;
-    idealist[index].isVoted = !idealist[index].isVoted;
-    idealist[index].votes += 1;
-    setList(idealist.reverse());
+    setVoting(true);
+    const ToastId = toast.loading('Voting ...');
+    const showBadgesAmount = [10, 50, 100, 150, 200, 250, 500];
+    let shouldAdd = false;
+
+
+    let feed = JSON.stringify({
+      votesAmount: IdeasURI.votesAmount + 1,
+      goalTitle: GoalURI.Title,
+      ideasid: ideas_id
+    });
+
+    if (showBadgesAmount.includes(IdeasURI.votesAmount + 1)) {
+      shouldAdd = true;
+    }
+
+    function onSuccess() {
+      let idealist = list;
+      idealist[index].isVoted = !idealist[index].isVoted;
+      idealist[index].votes += 1;
+      setList(idealist.reverse());
+      
+      window.location.reload();
+    }
+    if (PolkadotLoggedIn) {
+      const txs = [
+        api._extrinsics.ideas.createVote(goalIdTxt, ideas_id, (window.userid))
+      ];
+      if (shouldAdd) {
+        txs.push(api._extrinsics.feeds.addFeed(JSON.stringify(feed), "vote", new Date().valueOf()))
+      }
+
+      const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, ToastId, 'Voted successfully!', () => { onSuccess() });
+      });
+    } else {
+
+      try {
+        await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(goalIdTxt, ideas_id, Number(window.userid), feed, shouldAdd));
+        toast.update(ToastId, {
+          render: 'Voted Successfully!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 1000,
+          closeButton: true,
+          closeOnClick: true,
+          draggable: true
+        });
+        onSuccess();
+      } catch (error) {
+        console.error(error);
+        setVoting(false);
+        return;
+      }
+    }
+    
   }
 
   function closeDonateModal(event) {
@@ -273,7 +329,7 @@ export default function Goal() {
                         VoteIdea(listItem.ideasId, index);
                       }}
                       onClickDonate={() => {
-                        DonateToIdeas(listItem.ideasId, listItem.wallet);
+                        DonateToIdeas(listItem.ideasId, listItem.wallet,listItem.recieve_wallet);
                       }}
                       item={listItem}
                       key={index}
@@ -291,8 +347,8 @@ export default function Goal() {
           </div>
         )}
       </div>
-      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} goalId={goalIdTxt} daoId={GoalURI.daoId} goalTitle={GoalURI.Title}/>
-      <DonateCoinModal ideasid={selectedIdeasId} show={DonatemodalShow} onHide={closeDonateModal} address={selectedIdeasWallet} />
+      <CreateIdeaModal show={showCreateIdeaModal} onClose={closeCreateIdeaModal} goalId={goalIdTxt} daoId={GoalURI.daoId} goalTitle={GoalURI.Title} />
+      <DonateCoinModal ideasid={selectedIdeasId} goalURI={GoalURI} show={DonatemodalShow} onHide={closeDonateModal} address={selectedIdeasWallet} recieveWallet={selectedIdeasRecieveWallet}/>
     </>
   );
 }

@@ -16,6 +16,7 @@ import { toast } from 'react-toastify';
 export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle }) {
   const [IdeasImage, setIdeasImage] = useState([]);
   const [creating, setCreating] = useState(false);
+  const [RecieveType, setRecieveType] = useState('EVM');
 
   const { contract, sendTransaction } = useContract();
   const { userInfo ,PolkadotLoggedIn,userWalletPolkadot,showToast,userSigner,api} = usePolkadotContext();
@@ -32,6 +33,13 @@ export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle 
     type: 'text',
     placeholder: 'Ideas name',
     id: ''
+  });
+  
+  const [RecieveWallet, RecieveWalletInput, setRecieveWallet] = UseFormInput({
+    defaultValue: '',
+    type: 'text',
+    placeholder: `Wallet Address (${RecieveType})`,
+    id: 'recipient'
   });
   const [Referenda, ReferendaInput] = UseFormInput({
     defaultValue: '',
@@ -69,6 +77,16 @@ export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle 
     1: '70%',
     2: '10%'
   };
+
+
+  useEffect(() => {
+    if (!PolkadotLoggedIn) {
+      setRecieveType('Polkadot');
+    } else {
+      setRecieveType('EVM');
+    }
+  }, [PolkadotLoggedIn]);
+
 
   //Function after clicking Create Ideas Button
   async function createIdeas() {
@@ -128,6 +146,10 @@ export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle 
         wallet: {
           type: 'string',
           description: window.signerAddress
+        },
+        recieve_wallet: {
+          type: 'string',
+          description: RecieveWallet
         },
         user_id: {
           type: 'string',
@@ -279,6 +301,13 @@ export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle 
                 </h6>
                 {IdeasDescriptionInput}
               </div>
+              <div className="flex flex-col gap-2">
+              <h6>
+                Recipeint
+                <Required />
+              </h6>
+              {RecieveWalletInput}
+            </div>
               {/* <div className="flex flex-col gap-2">
               <h6>Referenda (Optional)</h6>
               {ReferendaInput}

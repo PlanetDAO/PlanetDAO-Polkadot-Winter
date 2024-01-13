@@ -21,7 +21,7 @@ contract PlanetDAO {
   }
 
   struct donation_struct {
-    uint256 ideas_id;
+    string ideas_id;
     uint256 userid;
     uint256 donation;
   }
@@ -32,8 +32,8 @@ contract PlanetDAO {
     string smart_contract_uri;
   }
   struct goal_ideas_votes_struct {
-    uint256 goal_id;
-    uint256 ideas_id;
+    string goal_id;
+    string ideas_id;
     uint256 user_id;
   }
   struct message_struct {
@@ -242,14 +242,13 @@ contract PlanetDAO {
     _ideas_uris[_ideas_id].ideas_uri = _ideas_uri;
   }
 
-  function add_donation(uint256 _ideas_id, uint256 _doantion, uint256 _userid, string memory _feed1, string memory _feed2) public {
+  function add_donation(string memory _ideas_id, uint256 _doantion, uint256 _userid, string memory _feed1, string memory _feed2) public {
     if (_user_badges[_userid].donation == false) {
       add_Feed(_feed1, 'badge');
     }
     add_Feed(_feed2, 'donation');
 
     _user_badges[_userid].donation = true;
-    _ideas_uris[_ideas_id].donation += _doantion;
     _donated[_userid] += _doantion;
     _donations[_donations_ids] = donation_struct(_ideas_id, _userid, _doantion);
     _donations_ids++;
@@ -328,7 +327,7 @@ contract PlanetDAO {
   }
 
   //Votes
-  function create_goal_ideas_vote(uint256 _goal_id, uint256 _ideas_id, uint256 _user_id, string memory _feed,bool  feed_add) public returns (uint256) {
+  function create_goal_ideas_vote(string memory _goal_id, string memory _ideas_id, uint256 _user_id, string memory _feed,bool  feed_add) public returns (uint256) {
     _user_badges[_user_id].vote = true;
     //Create votes into all_goal_ideas_votes
     all_goal_ideas_votes[_ideas_vote_ids] = goal_ideas_votes_struct(_goal_id, _ideas_id, _user_id);
@@ -339,19 +338,8 @@ contract PlanetDAO {
 
     return _ideas_vote_ids;
   }
-
-  function get_ideas_votes_from_goal(uint256 _goal_id, uint256 _ideas_id) public view returns (string[] memory) {
-    //gets all ideas votes from goal
-    string[] memory _StoreInfo = new string[](_ideas_vote_ids);
-    uint256 _store_id;
-    for (uint256 i = 0; i < _ideas_vote_ids; i++) {
-      if (all_goal_ideas_votes[i].goal_id == _goal_id && all_goal_ideas_votes[i].ideas_id == _ideas_id) _StoreInfo[_store_id] = Strings.toString(all_goal_ideas_votes[i].user_id);
-      _store_id++;
-    }
-    return _StoreInfo;
-  }
-
-  //Messages
+  
+    //Messages
   function sendMsg(uint256 _ideas_id, string memory _message, string memory _sender, uint256 _user_id) public returns (uint256) {
     _user_badges[_user_id].comment = true;
     //Create messsage into all_messages

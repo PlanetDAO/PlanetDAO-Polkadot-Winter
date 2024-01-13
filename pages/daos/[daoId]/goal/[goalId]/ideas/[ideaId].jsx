@@ -14,9 +14,10 @@ import { usePolkadotContext } from '../../../../../../contexts/PolkadotContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import useEnvironment from '../../../../../../services/useEnvironment';
+import { toast } from 'react-toastify';
 
 export default function GrantIdeas() {
-  const { api, showToast, getUserInfoById, userInfo, GetAllDaos,GetAllGoals,GetAllJoined, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, showToast, getUserInfoById,  userInfo ,userWalletPolkadot,userSigner,GetAllVotes, GetAllDaos,GetAllGoals,GetAllJoined, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
   const [ideaId, setIdeasId] = useState("");
   const [goalId, setGoalId] = useState("");
   const [PollIndex, setPollIndex] = useState(-1);
@@ -25,7 +26,7 @@ export default function GrantIdeas() {
   const [currency, setCurrency] = useState('');
   const [CurrentDAO, setCurrentDAO] = useState({});
 
-  const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '', isVoted: true, isOwner: true, allfiles: [] });
+  const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', recieve_wallet:'',logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '',recievetype:"", isVoted: true, isOwner: true, allfiles: [] });
   const [DonatemodalShow, setDonateModalShow] = useState(false);
   const [VotingShow, setVotingShow] = useState(false);
   const [AccountAddress, setAccountAddress] = useState('');
@@ -109,46 +110,23 @@ export default function GrantIdeas() {
         }else{
           setIsJoined(false);
         }
+
+
+        let isvoted = false;
+        let allVotes =await GetAllVotes()
+        let currentIdeasVotes = allVotes.filter((e)=>e.ideasId == id)
+        for (let i = 0; i < currentIdeasVotes.length; i++) {
+          const element = (currentIdeasVotes[i]);
+          if (Number(element.user_id) == Number(window.userid)) isvoted = true;
+        }
         
-        // const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
-        // const object = JSON.parse(ideaURI); //Getting ideas uri
 
-        // let isJoined = await contract.is_person_joined(Number(Goalid), Number(window.userid));
-        // setIsJoined(isJoined);
-
-        // const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
-        // const goalURI = JSON.parse(goalURIFull.goal_uri);
-        // let allDaos = await GetAllDaos();
-        // let goalDAO = allDaos.filter((e) => (e.daoId = goalURIFull.dao_id))[0];
-
-        // let isvoted = false;
-        // const AllvotesWithEmpty = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(id)); //Getting all votes
-        // const Allvotes = AllvotesWithEmpty.filter((item, idx) => item !== '');
-
-        // for (let i = 0; i < Allvotes.length; i++) {
-        //   const element = Number(Allvotes[i]);
-        //   if (element == Number(window.userid)) isvoted = true;
-        // }
+        currentIdea.votesAmount = currentIdeasVotes.length;
+        currentIdea.isVoted = isvoted;
 
         setAccountAddress(currentIdea.wallet);
         setIdeasURI(currentIdea)
-        // setIdeasURI({
-        //   ideasId: id,
-        //   Title: object.properties.Title.description,
-        //   Description: object.properties.Description.description,
-        //   Referenda: object.properties?.Referenda?.description,
-        //   wallet: object.properties.wallet.description,
-        //   logo: object.properties.logo.description?.url,
-        //   End_Date: goalURI.properties.End_Date?.description,
-        //   goalURI: goalURI,
-        //   daoURI: goalDAO,
-        //   user_info: await getUserInfoById(Number(object.properties.user_id.description)),
-        //   votesAmount: Object.keys(Allvotes).length,
-        //   donation: Number((await contract._ideas_uris(Number(id))).donation) / 1e18,
-        //   isVoted: isvoted,
-        //   isOwner: object.properties.user_id.description == Number(window.userid) ? true : false,
-        //   allfiles: object.properties.allFiles
-        // });
+     
 
         setimageList(currentIdea.allfiles);
         setLoading(false);
@@ -212,37 +190,65 @@ export default function GrantIdeas() {
   }
 
   async function VoteIdea() {
+    
     if (IdeasURI.Referenda != 0) {
       setVotingShow(true);
       return;
     }
     setVoting(true);
+    const ToastId = toast.loading('Voting ...');
     const showBadgesAmount = [10, 50, 100, 150, 200, 250, 500];
     let shouldAdd = false;
-    const ideaURI = await contract.ideas_uri(Number(id)); //Getting ideas uri
-    let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-    const goalURIFull = await contract._goal_uris(Number(Goalid)); //Getting total goal (Number)
-    const goalURI = JSON.parse(goalURIFull.goal_uri);
+    
 
     let feed = JSON.stringify({
       votesAmount: IdeasURI.votesAmount + 1,
-      goalTitle: goalURI.properties.Title.description,
-      ideasid: Number(id)
+      goalTitle: IdeasURI?.goalURI?.Title,
+      ideasid: ideaId
     });
 
     if (showBadgesAmount.includes(IdeasURI.votesAmount + 1)) {
       shouldAdd = true;
     }
 
-    try {
-      await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(Number(Goalid), Number(id), Number(window.userid), feed, shouldAdd));
-    } catch (error) {
-      console.error(error);
+     function onSuccess() {
+      setIdeasURI({ ...IdeasURI, isVoted: !IdeasURI.isVoted,votesAmount : votesAmount +1 });
       setVoting(false);
-      return;
+      window.location.reload();
     }
-    setIdeasURI({ ...IdeasURI, isVoted: !IdeasURI.isVoted });
-    setVoting(false);
+    if (PolkadotLoggedIn) {
+      const txs = [
+        api._extrinsics.ideas.createVote(goalId,ideaId, (window.userid))
+      ];
+      if (shouldAdd){
+        txs.push(  api._extrinsics.feeds.addFeed(JSON.stringify(feed), "vote", new Date().valueOf()))
+      }
+
+      const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
+        showToast(status, ToastId, 'Voted successfully!', () => { onSuccess() });
+      });
+    }else{
+
+      try {
+        await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(goalId, ideaId, Number(window.userid), feed, shouldAdd));
+        toast.update(ToastId, {
+          render: 'Voted Successfully!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 1000,
+          closeButton: true,
+          closeOnClick: true,
+          draggable: true
+        });
+        onSuccess();
+      } catch (error) {
+        console.error(error);
+        setVoting(false);
+        return;
+      }
+    }
+  
+   
   }
 
   async function onClickDonate() {
@@ -423,8 +429,8 @@ export default function GrantIdeas() {
         </div>
       </div>
 
-      <DonateCoinModal ideasid={ideaId} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} />
-      <VoteConviction
+      <DonateCoinModal ideasid={ideaId} goalURI={IdeasURI?.goalURI} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} recieveWallet={IdeasURI.recieve_wallet} recievetype={IdeasURI.recievetype} />
+      {/* <VoteConviction
         goal_id={goalId}
         idea_id={ideaId}
         PollIndex={PollIndex}
@@ -433,7 +439,7 @@ export default function GrantIdeas() {
           setVotingShow(false);
         }}
         address={AccountAddress}
-      />
+      /> */}
     </>
   );
 }

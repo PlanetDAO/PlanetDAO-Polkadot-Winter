@@ -78,7 +78,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
         render: 'Joining Community....',
         type: 'pending'
       });
-      let recipient = recieveWallet == "" ? address : recieveWallet;
+      let recipient =  recievetype == "Polkadot" ? recieveWallet: address;
       const txs = [
         api.tx.balances.transferAllowDeath(recipient, `${Amount * 1e12}`),
         api._extrinsics.daos.joinCommunity(daoId, Number(window.userid), (new Date()).toLocaleDateString(), feed),
@@ -162,17 +162,6 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
       setMetamask()
     }
 
-    // const Web3 = require('web3');
-    // const web3 = new Web3(window.ethereum);
-    // let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
-    // let token = ' ' + getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;
-
-    // setToken(token);
-    // setBalance(Number((Balance / 1000000000000000000).toPrecision(5)));
-
-    // let UsdEchangePrice = await getUSDPriceForChain();
-    // let amount = SubsPrice / Number(UsdEchangePrice);
-    // setAmount(amount.toPrecision(5));
   }
   useEffect(() => {
     if (Coin !== "")
@@ -215,7 +204,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
 
             <div className="flex justify-between">
               <h4 className="font-semibold text-moon-18">
-                Token
+                Coin
               </h4>
               <h4 className="font-semibold text-moon-18">
               </h4>

@@ -16,8 +16,8 @@ const mockData = [
 
 const HeaderLabel = ({ children }) => <label className="flex items-center h-full">{children}</label>;
 
-const MembersTable = ({ allJoined }) => {
-  const { api, GetAllJoined, getUserInfoById } = usePolkadotContext();
+const MembersTable = ({ allJoined,goals }) => {
+  const { api, GetAllJoined,GetAllVotes, getUserInfoById } = usePolkadotContext();
   const [Data, setData] = useState([]);
   const [currency, setCurrency] = useState('');
 
@@ -96,11 +96,17 @@ const MembersTable = ({ allJoined }) => {
       for (let i = 0; i < allJoined.length; i++) {
         const element = allJoined[i];
         let userInfo = await getUserInfoById(element.user_id);
+
+        let UserCreatedGoals = goals.filter((e)=>Number(e.UserId) == Number(element.user_id))
+        
+        let totalVotes = 0;
+        UserCreatedGoals.forEach(e=>totalVotes+=e.votesCount)
+        
         let info = {
           name: userInfo?.fullName?.toString(),
           joinDate: element.joined_date,
           votePower: 1,
-          votesReceived: 0,
+          votesReceived: totalVotes,
           commentsReceived: 0,
           donationsReceived: 0,
           donated: 0
