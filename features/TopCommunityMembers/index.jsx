@@ -18,7 +18,7 @@ export const TopCommunityMembers = ({ daoId, allJoined, goals }) => {
     setisLoading(true);
 
     try {
-      if (api) {
+      if (api && goals.length > 0) {
         let Members = [];
         for (let i = 0; i < allJoined.length; i++) {
           const element = allJoined[i];
@@ -46,7 +46,7 @@ export const TopCommunityMembers = ({ daoId, allJoined, goals }) => {
   useEffect(() => {
     fetchContractData();
     setCurrency(useEnvironment.getCurrency());
-  }, [api,allJoined]);
+  }, [api,allJoined,goals]);
 
   return (
     <Card className="flex flex-col gap-4 w-[236px] h-fit">
