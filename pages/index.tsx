@@ -53,7 +53,7 @@ export default function Welcome() {
             <h3 className="text-moon-32 font-bold">Make decisions together</h3>
             <p>Members of a community have voting power based on their role and their contribution. All members can vote on the ideas they believe will reach the community’s goals.</p>
           </div>
-          <Image className="shrink-0" src="/home/decisions-together.png" alt="" width={420} height={360} />
+          <Image className="shrink-0" src="/home/decision-together.png" alt="" width={420} height={360} />
         </div>
         <div className="flex homepage-container flex-col items-center md:flex-row md:gap-16 md:items-start">
           <Image className="shrink-0" src="/home/reward-community.png" alt="" width={420} height={360} />

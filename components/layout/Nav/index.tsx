@@ -67,7 +67,7 @@ export function Nav(): JSX.Element {
       const { web3Accounts, web3Enable } = require('@polkadot/extension-dapp');
       try {
         let wallet = (await web3Accounts())[0];
-        if (wallet && api && userInfo) {
+        if (wallet && api && userInfo?.fullName) {
           const { nonce, data: balance } = await api.query.system.account(wallet.address);
 
           useEnvironment.setCurrency('DOT');

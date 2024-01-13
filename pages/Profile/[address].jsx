@@ -16,7 +16,10 @@ export default function Profile() {
   const { contract } = useContract();
 
   const { api, getUserInfoById, GetAllDaos, GetAllIdeas, GetAllGoals, GetAllJoined, GetAllVotes, GetAllUserDonations, PolkadotLoggedIn } = usePolkadotContext();
-  const [Donated, setDonated] = useState([]);
+  const [Goals, setGoals] = useState([]);
+  const [Ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [Daos, setDaos] = useState([]);
   const [UserBadges, setUserBadges] = useState({
     dao: false,
     joined: false,
@@ -45,6 +48,7 @@ export default function Profile() {
     setSignerAddress(window.signerAddress);
 
     if (!contract || !api) return false;
+    setLoading(true)
     if (user_id == window.userid) setLoggedUser(true);
     let user_info = await getUserInfoById(user_id);
     setUserInfo(user_info);
@@ -140,6 +144,9 @@ export default function Profile() {
     // 	}
     // }
 
+    setDaos(founddao);
+    setGoals(foundGoals);
+    setIdeas(foundidea);
 
        setUserBadges(allBadges);
 
@@ -152,7 +159,7 @@ export default function Profile() {
       donationsReceived: totalDonationsRecieved
 
     });
-
+    setLoading(false)
   }
 
   function goToFaucet() {
@@ -228,7 +235,7 @@ export default function Profile() {
       </div>
       <div className="container py-10">
         <Card className="min-h-[556px]">
-          {tabIndex === 0 && <SummaryPanel stats={stats} />}
+          {tabIndex === 0 && <SummaryPanel Daos={Daos} Goals={Goals} Ideas={Ideas} loggedUser={loggedUser} loading={loading} stats={stats} />}
           {tabIndex === 1 && <BadgesPanel />}
         </Card>
       </div>

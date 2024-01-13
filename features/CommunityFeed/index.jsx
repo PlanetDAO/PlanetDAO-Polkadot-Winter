@@ -26,9 +26,9 @@ const CommunityFeed = ({ communityName, daoId }) => {
         let allFeeds = await GetAllFeeds();
         let currentFeeds = [];
         try {
-          currentFeeds = allFeeds.filter((e) => e.data?.daoId === daoId);
+          currentFeeds = allFeeds.filter((e) => e.data?.daoId == daoId);
         } catch (e) {
-          currentFeeds = allFeeds;
+          currentFeeds = [];
         }
 
         setItems(sortDateDesc(currentFeeds, 'date'));

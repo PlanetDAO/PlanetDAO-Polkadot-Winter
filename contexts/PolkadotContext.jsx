@@ -654,6 +654,7 @@ export function PolkadotProvider({ children }) {
     let allDonations = await GetAllDonations();
     let users = {};
     allDonations.forEach((elm)=>{
+      if (users[elm.userid]== undefined) users[elm.userid]= 0;
       users[elm.userid] = Number(users[elm.userid] ) + elm.donation;
     })
     return users;

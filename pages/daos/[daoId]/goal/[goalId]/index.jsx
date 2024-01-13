@@ -276,7 +276,7 @@ export default function Goal() {
                   <h3 className="flex gap-2 whitespace-nowrap">
                     <div>
                       <span className="text-hit font-semibold">
-                        {currency} {GoalURI.total_donated}
+                        {currency} {GoalURI.reached}
                       </span>{' '}
                       of {currency} {GoalURI.Budget}
                     </div>
