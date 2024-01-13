@@ -20,7 +20,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
   const [CurrentChain, setCurrentChain] = useState('');
   const [CurrentChainNetwork, setCurrentChainNetwork] = useState(0);
   const [CurrentAddress, setCurrentAddress] = useState('');
-  const [Coin, setCoin] = useState('DEV');
+  const [Coin, setCoin] = useState('');
   const [isLoading, setisLoading] = useState(false);
   const [isSent, setisSent] = useState(false);
   const { sendTransaction } = useContract();
@@ -161,15 +161,16 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
       setCurrentChainNetwork(Number(window.ethereum.networkVersion));
       setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
     }
+    
 
 
-    if (PolkadotLoggedIn && currencyChanged == false) {
+    if (PolkadotLoggedIn && currencyChanged == false && Coin == "") {
       setPolkadot();
 
     } else if (currencyChanged == true && Coin == "DOT") {
       await switchNetworkByToken(Coin)
       setPolkadot();
-    } else if (currencyChanged == true && Coin !== "DOT") {
+    } else if (currencyChanged == true && Coin !== "DOT" && Coin !== "") {
       await switchNetworkByToken(Coin)
       setMetamask()
     }
