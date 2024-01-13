@@ -16,20 +16,21 @@ const CommunityFeed = ({ communityName, daoId }) => {
   const [userName, setUserName] = useState('');
   const { contract } = useContract();
   const [showPostModal, setShowPostModal] = useState(false);
-  const { api,userInfo,GetAllFeeds } = usePolkadotContext();
+  const { api, userInfo, GetAllFeeds } = usePolkadotContext();
 
   async function fetchContractData() {
     setLoading(true);
 
     try {
       if (api) {
-        let allFeeds = await GetAllFeeds()
+        let allFeeds = await GetAllFeeds();
         let currentFeeds = [];
-        try{allFeeds.filter((e)=>e.data?.daoId.toString() ==  daoId.toString())
-        }catch(e){
+        try {
+          currentFeeds = allFeeds.filter((e) => e.data?.daoId === daoId);
+        } catch (e) {
           currentFeeds = allFeeds;
         }
-        
+
         setItems(sortDateDesc(currentFeeds, 'date'));
 
         setLoading(false);

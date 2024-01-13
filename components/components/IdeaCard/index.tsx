@@ -35,11 +35,11 @@ const IdeaCard = ({ item, onClickVote, onClickDonate, preview, hideGoToButton, c
             <p>Votes</p>
           </div>
           <div className="absolute bottom-0 right-0 flex gap-2">
-            {!item.isVoted && !preview && !item.isOwner && (
+            {/* {!item.isVoted && !preview && !item.isOwner && (
               <Button variant="secondary" iconLeft={<GenericHeart />} onClick={onClickVote}>
                 Vote
               </Button>
-            )}
+            )} */}
 
             {!item.isOwner && !preview && (
               <Button variant="secondary" iconLeft={<ShopWallet />} onClick={onClickDonate}>
