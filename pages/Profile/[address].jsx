@@ -28,17 +28,8 @@ export default function Profile() {
     reply: false
   });
 
-  const [TotalRead, setTotalRead] = useState(0);
-  const [Replied, setReplied] = useState(0);
   const [UserInfo, setUserInfo] = useState({});
-  const [Daos, setDaos] = useState([]);
-  const [Ideas, setIdeas] = useState([]);
-  const [DontatedIdeas, setDontatedIdeas] = useState([]);
-  const [RepliesIdeas, setRepliesIdeas] = useState([]);
-  const [AllMessages, setAllMessages] = useState([]);
-  const [userid, setUserid] = useState('');
   const [tabIndex, setTabIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [loggedUser, setLoggedUser] = useState(false);
   const [signerAddress, setSignerAddress] = useState('');
   const [stats, setStats] = useState({});
@@ -47,13 +38,12 @@ export default function Profile() {
 
   useEffect(() => {
     fetchContractData();
-  }, [contract, api]);
+  }, [contract, api,router]);
 
   async function fetchContractData() {
-    setLoading(true);
     let user_id = Number(router.query.address);
     setSignerAddress(window.signerAddress);
-    setUserid(user_id);
+
     if (!contract || !api) return false;
     if (user_id == window.userid) setLoggedUser(true);
     let user_info = await getUserInfoById(user_id);
@@ -109,48 +99,21 @@ export default function Profile() {
     allBadges['vote'] = allVotes.filter((e) => Number(e.user_id) == Number(user_id)).length > 0 ? true : false;
     allBadges['donation'] = donated > 0 ? true : false;
 
-    let _donations_ids = await contract._donations_ids();
-    let ideasURIS = [];
-    for (let i = 0; i < _donations_ids; i++) {
-      let donationURI = await contract._donations(i);
-      if (donationURI.userid == user_id) {
-        let existsIdea = ideasURIS.findIndex((e) => e.id == Number(donationURI.ideas_id));
-        if (existsIdea != -1) {
-          ideasURIS[existsIdea].donation += Number(donationURI.donation) / 1e18;
-          continue;
-        }
-        let ideaURI = JSON.parse((await contract._ideas_uris(Number(donationURI.ideas_id))).ideas_uri);
-        ideaURI.donation = Number(donationURI.donation) / 1e18;
-        ideaURI.id = Number(donationURI.ideas_id);
-        ideasURIS.push(ideaURI);
-      }
-    }
-    let allMessages = [];
+  
+    let totalDonationsRecieved = 0;
+    foundGoals.forEach(e => totalDonationsRecieved += e.reached)
+
+
+  
 
     let ideasReplied = 0;
-    let MessagesIdeasURIS = [];
     let _message_ids = await window.contract._message_ids();
     for (let i = 0; i < _message_ids; i++) {
       let messageURI = await window.contract.all_messages(i);
 
       if (JSON.parse(messageURI.message).userid == user_id) {
         ideasReplied += 1;
-        let ideaURI = JSON.parse((await window.contract._ideas_uris(Number(messageURI.ideas_id))).ideas_uri);
-
-        let parsed_message = JSON.parse(messageURI.message);
-        parsed_message.idea = ideaURI;
-
-        allMessages.push(parsed_message);
-
-        let existsIdea = MessagesIdeasURIS.findIndex((e) => e.id == Number(messageURI.ideas_id));
-        if (existsIdea != -1) {
-          MessagesIdeasURIS[existsIdea].replied += 1;
-          continue;
-        }
-
-        ideaURI.replied = 1;
-        ideaURI.id = Number(messageURI.ideas_id);
-        MessagesIdeasURIS.push(ideaURI);
+       
       }
     }
 
@@ -177,25 +140,19 @@ export default function Profile() {
     // 	}
     // }
 
-    setReplied(ideasReplied);
-    setDonated(donated);
-    setTotalRead(total_read);
-    setDaos(founddao);
-    setIdeas(foundidea);
-    setDontatedIdeas(ideasURIS);
-    setRepliesIdeas(MessagesIdeasURIS);
-    setUserBadges(allBadges);
+
+       setUserBadges(allBadges);
 
     setStats({
       daosCreated: founddao.length,
       goalsCreated: foundGoals.length,
       ideasCreated: foundidea.length,
-      donated: donated
+      commentsCreated:ideasReplied,
+      donated: donated,
+      donationsReceived: totalDonationsRecieved
+
     });
 
-    setAllMessages(allMessages);
-
-    setLoading(false);
   }
 
   function goToFaucet() {

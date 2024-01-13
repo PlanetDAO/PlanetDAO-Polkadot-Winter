@@ -115,9 +115,10 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
       if (Number(window.ethereum.networkVersion) === 1287) {
         //If it is sending from Moonbase so it will use batch precompiles
         ShowAlert('pending', 'Sending Batch Transaction....');
-        await BatchDonate(Amount, recipient, Number(ideasid), Coin, feed1, feed2);
+        await BatchDonate(Amount, recipient, ideasid, Coin, feed1, feed2);
 
         ShowAlert('success', 'Donation success!');
+        onSuccess()
       } else {
         let output = await sendTransfer(Number(window.ethereum.networkVersion), Amount, recipient, ShowAlert);
         setTransaction({
@@ -129,6 +130,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
         ShowAlert('pending', 'Saving information....');
         await sendTransaction(await window.contract.populateTransaction.add_donation(ideasid, `${Amount * 1e18}`, Number(window.userid), feed1, feed2));
         ShowAlert('success', 'Success!');
+        onSuccess()
       }
     }
   }
