@@ -170,9 +170,9 @@ export function Nav(): JSX.Element {
               <div className="wallet" style={{ height: 48, display: 'flex', alignItems: 'center' }}>
                 <div className="wallet__wrapper gap-4 flex items-center">
                   <div className="wallet__info flex flex-col items-end">
-                    <a href={'/Profile/' + user_id} rel="noreferrer" className="text-primary max-w-[250px]">
+                    <Link href={'/Profile/' + user_id} rel="noreferrer" className="text-primary max-w-[250px]">
                       <div className="font-medium text-whis truncate">{acc}</div>
-                    </a>
+                    </Link>
                     <div className="text-goten font-semibold truncate">{Balance}</div>
                   </div>
                   <Dropdown value={null} onChange={null}>
