@@ -32,7 +32,7 @@ export function Nav(): JSX.Element {
       return;
     }
     if (window.localStorage.getItem('login-type') === 'metamask' && (await window.ethereum._metamask.isUnlocked())) {
-      if (window?.ethereum?.selectedAddress?.toLocaleUpperCase() != null && api && userInfo) {
+      if (window?.ethereum?.selectedAddress != null && api && userInfo?.fullName) {
         try {
           const Web3 = require('web3');
           const web3 = new Web3(window.ethereum);

@@ -14,7 +14,7 @@ import { ControlsClose } from '@heathmont/moon-icons-tw';
 import UseFormInput from '../../components/components/UseFormInput';
 import { toast } from 'react-toastify';
 
-export default function DonateCoin({ ideasid, goalURI, show, onHide, address, recieveWallet, recievetype }) {
+export default function DonateCoin({ ideasid,daoId, goalURI, show, onHide, address, recieveWallet, recievetype }) {
   const [Balance, setBalance] = useState('');
   const { userInfo, PolkadotLoggedIn, userWalletPolkadot, userSigner, showToast, api } = usePolkadotContext();
   const [CurrentChain, setCurrentChain] = useState('');
@@ -82,7 +82,8 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
     let feed2 = JSON.stringify({
       donated: Amount,
       goalTitle: goalURI.Title,
-      ideasid: ideasid
+      ideasid: ideasid,
+      daoId: daoId
     });
 
     async function onSuccess() {

@@ -105,7 +105,7 @@ export default function Profile() {
 
   
     let totalDonationsRecieved = 0;
-    foundGoals.forEach(e => totalDonationsRecieved += e.reached)
+    foundidea.forEach(e => totalDonationsRecieved += e.donation)
 
 
   

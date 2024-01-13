@@ -54,7 +54,7 @@ const CommunityFeed = ({ communityName, daoId }) => {
 
   useEffect(() => {
     fetchContractData();
-  }, [api]);
+  }, [api,daoId]);
 
   return (
     <div className="flex flex-col gap-2 w-full items-center pb-10 min-w-[540px]">

@@ -437,7 +437,7 @@ export default function GrantIdeas() {
         </div>
       </div>
 
-      <DonateCoinModal ideasid={ideaId} goalURI={IdeasURI?.goalURI} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} recieveWallet={IdeasURI.recieve_wallet} recievetype={IdeasURI.recievetype} />
+      <DonateCoinModal ideasid={ideaId}  daoId={router.query.daoId}  goalURI={IdeasURI?.goalURI} show={DonatemodalShow} onHide={closeDonateModal} address={AccountAddress} recieveWallet={IdeasURI.recieve_wallet} recievetype={IdeasURI.recievetype} />
       {/* <VoteConviction
         goal_id={goalId}
         idea_id={ideaId}
