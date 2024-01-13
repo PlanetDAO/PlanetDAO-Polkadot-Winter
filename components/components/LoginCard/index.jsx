@@ -7,7 +7,7 @@ import UseFormInput from '../UseFormInput';
 import { usePolkadotContext } from '../../../contexts/PolkadotContext';
 import { toast } from 'react-toastify';
 
-const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { step: number; onConnect: MouseEventHandler<HTMLButtonElement>; onConnectMetamask: MouseEventHandler<HTMLButtonElement>; onConnectPolkadot: MouseEventHandler<HTMLButtonElement>; setStep: Dispatch<SetStateAction<number>> }) => {
+const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep })=> {
   const { api, deriveAcc, showToast, EasyToast } = usePolkadotContext();
 
   const [Email, EmailInput] = UseFormInput({
@@ -80,7 +80,7 @@ const LoginCard = ({ step, onConnectMetamask, onConnectPolkadot, setStep }: { st
     }
   }
 
-  function isDisabled(): boolean {
+  function isDisabled() {
     return !(Email && Password);
   }
 
