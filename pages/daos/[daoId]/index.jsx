@@ -151,7 +151,6 @@ export default function DAO() {
 
   async function fetchContractDataFull() {
     setLoading(true);
-    //Fetching data from Moonbeam
     try {
       if (api && daoId !== undefined && daoId !== null) {
         //Load everything-----------
@@ -272,7 +271,7 @@ export default function DAO() {
         )}
         {tabIndex === 3 && (
           <div className="flex flex-col gap-8 container items-center pb-10">
-            <MembersTable allJoined={communityMembers} />
+            <MembersTable allJoined={communityMembers} goals={list} />
           </div>
         )}
       </div>

@@ -547,7 +547,7 @@ export function PolkadotProvider({ children }) {
     //Fetching data from Parachain
     try {
       if (api) {
-        let totalVotesCount = Number(await api._query.ideas.votoesIds());
+        let totalVotesCount = Number(await api._query.ideas.votesIds());
         let arr = [];
         for (let i = 0; i < totalVotesCount; i++) {
           const element = await api._query.ideas.VoteById(i);
