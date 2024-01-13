@@ -405,7 +405,7 @@ export default function DesignDao() {
     await fetchContractData();
   }
   async function SaveHTML() {
-    const ToastId = toast.loading('Updating ...'+Number(dao_id));
+    const ToastId = toast.loading('Updating ...');
 
     let output = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
     if (PolkadotLoggedIn) {

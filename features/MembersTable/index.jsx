@@ -16,7 +16,7 @@ const mockData = [
 
 const HeaderLabel = ({ children }) => <label className="flex items-center h-full">{children}</label>;
 
-const MembersTable = ({ allJoined, }) => {
+const MembersTable = ({ allJoined,goals }) => {
   const { api, GetAllDonations,GetAllIdeas,GetAllVotes, getUserInfoById } = usePolkadotContext();
   const [Data, setData] = useState([]);
   const [currency, setCurrency] = useState('');
