@@ -142,9 +142,7 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
     async function onSuccess() {
       setCreating(false);
       onClose({ success: true });
-      window.setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+       window.location.reload();
     }
     if (PolkadotLoggedIn) {
       let goalid = Number(await api._query.goals.goalIds());
@@ -172,6 +170,7 @@ export default function CreateGoalModal({ open, onClose, daoId }) {
           closeOnClick: true,
           draggable: true
         });
+        onSuccess();
       } catch (error) {
         setCreating(false);
         console.error(error);

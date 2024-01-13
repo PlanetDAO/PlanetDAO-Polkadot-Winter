@@ -16,15 +16,19 @@ const CommunityFeed = ({ communityName, daoId }) => {
   const [userName, setUserName] = useState('');
   const { contract } = useContract();
   const [showPostModal, setShowPostModal] = useState(false);
-  const { userInfo,GetAllFeeds } = usePolkadotContext();
+  const { api,userInfo,GetAllFeeds } = usePolkadotContext();
 
   async function fetchContractData() {
     setLoading(true);
 
     try {
-      if (contract) {
+      if (api) {
         let allFeeds = await GetAllFeeds()
-        let currentFeeds = allFeeds.filter((e)=>e.data?.daoId.toString() ==  daoId.toString())
+        let currentFeeds = [];
+        try{allFeeds.filter((e)=>e.data?.daoId.toString() ==  daoId.toString())
+        }catch(e){
+          currentFeeds = allFeeds;
+        }
         
         setItems(sortDateDesc(currentFeeds, 'date'));
 
@@ -49,7 +53,7 @@ const CommunityFeed = ({ communityName, daoId }) => {
 
   useEffect(() => {
     fetchContractData();
-  }, [contract]);
+  }, [api]);
 
   return (
     <div className="flex flex-col gap-2 w-full items-center pb-10 min-w-[540px]">

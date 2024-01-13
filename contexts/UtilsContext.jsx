@@ -34,15 +34,20 @@ export function UtilsProvider({ children }) {
   const [BiconomySmartAccount, SetBiconomySmartAccount] = useState(null);
 
   async function loadPrice() {
-    const targetNetwork = config.moonbase; //Moonbase
+    try {
+      const targetNetwork = config.moonbase; //Moonbase
 
-    let targetProvider = new ethers.providers.JsonRpcProvider(targetNetwork.rpc);
-    const PriceFeedContract = new ethers.Contract(config.price_feed_address, PriceFeedABI.abi, targetProvider);
-    let symbol = await PriceFeedContract.decimals();
-    let exchangePriceInfo = await PriceFeedContract.latestRoundData();
-    let symoblvalue = 10 ** Number(symbol);
-    let exchangePrice = Number(exchangePriceInfo.answer) / symoblvalue;
-    SetUSDPrice(exchangePrice.toFixed(2));
+      let targetProvider = new ethers.providers.JsonRpcProvider(targetNetwork.rpc);
+      const PriceFeedContract = new ethers.Contract(config.price_feed_address, PriceFeedABI.abi, targetProvider);
+      let symbol = await PriceFeedContract.decimals();
+      let exchangePriceInfo = await PriceFeedContract.latestRoundData();
+      let symoblvalue = 10 ** Number(symbol);
+      let exchangePrice = Number(exchangePriceInfo.answer) / symoblvalue;
+      SetUSDPrice(exchangePrice.toFixed(2));
+    } catch (error) {
+      SetUSDPrice(0)
+    }
+  
   }
   async function getUSDPriceForChain() {
     let token = getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;

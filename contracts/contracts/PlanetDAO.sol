@@ -38,7 +38,7 @@ contract PlanetDAO {
   }
   struct message_struct {
     uint256 message_id;
-    uint256 ideas_id;
+    string ideas_id;
     string message;
     string sender;
   }
@@ -340,7 +340,7 @@ contract PlanetDAO {
   }
   
     //Messages
-  function sendMsg(uint256 _ideas_id, string memory _message, string memory _sender, uint256 _user_id) public returns (uint256) {
+  function sendMsg(string memory _ideas_id, string memory _message, string memory _sender, uint256 _user_id) public returns (uint256) {
     _user_badges[_user_id].comment = true;
     //Create messsage into all_messages
     all_messages[_message_ids] = message_struct(_message_ids, _ideas_id, _message, _sender);
@@ -349,12 +349,12 @@ contract PlanetDAO {
     return _message_ids;
   }
 
-  function getMsgIDs(uint256 ideas_id) public view returns (uint256[] memory) {
+  function getMsgIDs(string memory ideas_id) public view returns (uint256[] memory) {
     //Getting all messages ids by idea id
     uint256[] memory _All_Ideas_Messages = new uint256[](_message_ids);
     uint256 _msg_id;
     for (uint256 i = 0; i < _message_ids; i++) {
-      if (all_messages[i].ideas_id == ideas_id) {
+      if (keccak256(bytes(all_messages[i].ideas_id)) == keccak256(bytes(ideas_id))) {
         _All_Ideas_Messages[_msg_id] = all_messages[i].message_id;
         _msg_id++;
       }

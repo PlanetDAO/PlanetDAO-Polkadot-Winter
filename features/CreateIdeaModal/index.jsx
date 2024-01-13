@@ -168,16 +168,15 @@ export default function CreateIdeaModal({ show, onClose, daoId,goalId,goalTitle 
     let feed = ({
       name: userInfo?.fullName.toString(),
       goalTitle: goalTitle,
-      ideasid: 0
+      ideasid: 0,
+      daoId:daoId
     });
 
 
     async function onSuccess() {
       setCreating(false);
-      onClose({ success: true });
-      window.setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      onClose({ success: true });  
+       window.location.reload();
     }
     if (PolkadotLoggedIn) {
       let ideasId = Number(await api._query.ideas.ideasIds());

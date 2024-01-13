@@ -40,7 +40,7 @@ export default function useContract() {
 
 					window.sendTransaction = sendTransaction;
 					window.signer = signer;
-					contract.signerAddress = (await signer.getAddress())?.toString()?.toLocaleLowerCase();
+					contract.signerAddress = (await signer.getAddress())?.toString()?.toLocaleUpperCase();
 					window.signerAddress = contract.signerAddress;
 
 					setContractInstance(contract);

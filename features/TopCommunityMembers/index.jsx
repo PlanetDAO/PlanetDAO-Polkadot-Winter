@@ -7,41 +7,35 @@ import useEnvironment from '../../services/useEnvironment';
 
 const options = [{ id: 'most_donations_received', label: 'Received donations' }];
 
-export const TopCommunityMembers = ({ daoId,allJoined }) => {
+export const TopCommunityMembers = ({ daoId, allJoined, goals }) => {
   const [selectedOption, setSelectedOption] = useState(options[0]);
-  const { getUserInfoById } = usePolkadotContext();
+  const { api, getUserInfoById } = usePolkadotContext();
   const [items, setItems] = useState([]);
   const [isLoading, setisLoading] = useState(false);
   const [currency, setCurrency] = useState('');
-
-  const { contract } = useContract();
 
   async function fetchContractData() {
     setisLoading(true);
 
     try {
-      if (contract) {
-        const totalDonations = await contract._donations_ids();
-        let alldonations = [];
+      if (api) {
+        let Members = [];
+        for (let i = 0; i < allJoined.length; i++) {
+          const element = allJoined[i];
+          let userInfo = await getUserInfoById(element.user_id);
+          let UserCreatedGoals = goals.filter((e) => Number(e.UserId) ==Number (element.user_id))
 
-        for (let i = 0; i < Number(totalDonations); i++) {
-          const donated = await contract._donations(i);
-          // let dao_id_of_donated = await contract.get_dao_id_by_ideas_id(Number(donated.ideas_id));
-          // if (dao_id_of_donated == daoId) {
-          //   let foundUserDonated = alldonations.findIndex((item, idx) => item.userid == Number(donated.userid));
-          //   if (foundUserDonated == -1) {
-          //     let user_info = await getUserInfoById(Number(donated.userid));
-          //     alldonations.push({
-          //       userid: Number(donated.userid),
-          //       name: user_info?.fullName?.toString(),
-          //       amount: Number(donated.donation) / 1e18
-          //     });
-          //   } else {
-          //     alldonations[foundUserDonated].amount += Number(donated.donation) / 1e18;
-          //   }
-          // }
+          let totalDonations = 0;
+          UserCreatedGoals.forEach(e => totalDonations += e.reached)
+          Members.push({
+            userid: (element.user_id),
+            name: userInfo?.fullName?.toString(),
+            amount: Number(totalDonations)
+          });
+
+
         }
-        setItems(alldonations);
+        setItems(Members);
         setisLoading(false);
       }
     } catch (error) {
@@ -52,7 +46,7 @@ export const TopCommunityMembers = ({ daoId,allJoined }) => {
   useEffect(() => {
     fetchContractData();
     setCurrency(useEnvironment.getCurrency());
-  }, [contract]);
+  }, [api,allJoined]);
 
   return (
     <Card className="flex flex-col gap-4 w-[236px] h-fit">

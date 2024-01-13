@@ -143,7 +143,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
     async function setMetamask() {
       const Web3 = require('web3');
       const web3 = new Web3(window.ethereum);
-      let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+      let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleUpperCase());
 
       if (Coin !== 'DEV') {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -156,7 +156,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
       setBalance((Balance / 1000000000000000000).toFixed(5));
       setCurrentChain(getChain(Number(window.ethereum.networkVersion)).name);
       setCurrentChainNetwork(Number(window.ethereum.networkVersion));
-      setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+      setCurrentAddress(window?.ethereum?.selectedAddress?.toLocaleUpperCase());
     }
 
     if (PolkadotLoggedIn && currencyChanged == false && Coin == '') {
@@ -190,7 +190,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
             <h1 className="text-moon-20 font-semibold">Donate to idea</h1>
             <IconButton className="text-trunks" variant="ghost" icon={<ControlsClose />} onClick={onHide} />
           </div>
-          <div className="flex flex-col gap-6 w-full max-h-[calc(90vh-162px)] overflow-auto">
+          <div className="flex flex-col gap-6 w-full max-h-[calc(90vh-162px)]">
             <form id="doanteForm" onSubmit={DonateCoinSubmission} autoComplete="off">
               <div name="alertbox" hidden>
                 <Alert variant="filled" sx={{ my: 1 }} name="pendingAlert" severity="info">
@@ -208,7 +208,7 @@ export default function DonateCoin({ ideasid, goalURI, show, onHide, address, re
                 <div className="flex items-center ">
                   <span className="font-semibold flex-1">Total</span>
                   <div className="max-w-[140px] mr-4"> {AmountInput}</div>
-                  <Dropdown value={Coin} onChange={setCoin} className="max-w-[100px]">
+                  <Dropdown value={Coin} onChange={setCoin} className="max-w-[100px] ">
                     <Dropdown.Select>{Coin}</Dropdown.Select>
                     <Dropdown.Options className="bg-gohan w-48 min-w-0">
                       <Dropdown.Option value="DOT">

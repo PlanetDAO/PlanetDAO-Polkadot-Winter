@@ -132,7 +132,7 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
     async function setMetamask() {
       const Web3 = require('web3');
       const web3 = new Web3(window.ethereum);
-      let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+      let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleUpperCase());
       let token = getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;
       setCoin(token);
 
@@ -193,7 +193,9 @@ export default function JoinCommunityModal({ SubsPrice, show, onHide, address, r
               <div className="flex items-center gap-2">
                 {Amount}
                 <Dropdown value={Coin} onChange={setCoin}>
-                  <Dropdown.Select placeholder={'Select a currency'}>{Coin}</Dropdown.Select>
+                  <Dropdown.Select placeholder={"Select a Currency"} >
+                    {Coin}
+                  </Dropdown.Select>
                   <Dropdown.Options className="bg-gohan w-48 min-w-0 w-full">
                     <Dropdown.Option value="DOT">
                       <MenuItem>DOT</MenuItem>

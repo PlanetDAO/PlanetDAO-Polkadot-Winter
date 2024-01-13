@@ -17,7 +17,7 @@ import useEnvironment from '../../../../../../services/useEnvironment';
 import { toast } from 'react-toastify';
 
 export default function GrantIdeas() {
-  const { api, showToast, getUserInfoById,  userInfo ,userWalletPolkadot,userSigner,GetAllVotes, GetAllDaos,GetAllGoals,GetAllJoined, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
+  const { api, showToast, getUserInfoById, userInfo, userWalletPolkadot, userSigner, GetAllVotes, GetAllDaos, GetAllGoals, GetAllJoined, GetAllIdeas, PolkadotLoggedIn } = usePolkadotContext();
   const [ideaId, setIdeasId] = useState("");
   const [goalId, setGoalId] = useState("");
   const [PollIndex, setPollIndex] = useState(-1);
@@ -26,7 +26,7 @@ export default function GrantIdeas() {
   const [currency, setCurrency] = useState('');
   const [CurrentDAO, setCurrentDAO] = useState({});
 
-  const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', recieve_wallet:'',logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '',recievetype:"", isVoted: true, isOwner: true, allfiles: [] });
+  const [IdeasURI, setIdeasURI] = useState({ ideasId: '', Title: '', Description: '', Referenda: 0, wallet: '', recieve_wallet: '', logo: '', End_Date: '', voted: 0, delegAmount: 0, delegDated: '', recievetype: "", isVoted: true, isOwner: true, allfiles: [] });
   const [DonatemodalShow, setDonateModalShow] = useState(false);
   const [VotingShow, setVotingShow] = useState(false);
   const [AccountAddress, setAccountAddress] = useState('');
@@ -86,12 +86,12 @@ export default function GrantIdeas() {
 
     try {
       if (contract && id != "" && Goalid != "" && api) {
-        
+
         let allIdeas = await GetAllIdeas()
-        let currentIdea=allIdeas.filter(e=>e.ideasId == id)[0]
+        let currentIdea = allIdeas.filter(e => e.ideasId == id)[0]
 
         let allGoals = await GetAllGoals()
-        let currentGoal =allGoals.filter(e=>e.goalId == Goalid)[0] 
+        let currentGoal = allGoals.filter(e => e.goalId == Goalid)[0]
 
         currentIdea.End_Date = currentGoal.End_Date;
         currentIdea.goalURI = currentGoal;
@@ -99,77 +99,85 @@ export default function GrantIdeas() {
 
 
         let allDaos = await GetAllDaos()
-        let currentDao =allDaos.filter(e=>e.daoId == currentGoal.daoId)[0] 
+        let currentDao = allDaos.filter(e => e.daoId == currentGoal.daoId)[0]
 
         setCurrentDAO(currentDao);
         let allJoined = await GetAllJoined();
-        let currentJoined =  (allJoined).filter((e) => (e?.daoId) == (currentGoal.daoId.toString()))
-        let joinedInfo = currentJoined.filter((e)=>e?.user_id.toString() == window.userid.toString() )
+        let currentJoined = (allJoined).filter((e) => (e?.daoId) == (currentGoal.daoId.toString()))
+        let joinedInfo = currentJoined.filter((e) => e?.user_id.toString() == window.userid.toString())
         if (joinedInfo.length > 0) {
-           setIsJoined(true);
-        }else{
+          setIsJoined(true);
+        } else {
           setIsJoined(false);
         }
 
 
         let isvoted = false;
-        let allVotes =await GetAllVotes()
-        let currentIdeasVotes = allVotes.filter((e)=>e.ideasId == id)
+        let allVotes = await GetAllVotes()
+        let currentIdeasVotes = allVotes.filter((e) => e.ideasId == id)
         for (let i = 0; i < currentIdeasVotes.length; i++) {
           const element = (currentIdeasVotes[i]);
           if (Number(element.user_id) == Number(window.userid)) isvoted = true;
         }
-        
+
 
         currentIdea.votesAmount = currentIdeasVotes.length;
         currentIdea.isVoted = isvoted;
 
         setAccountAddress(currentIdea.wallet);
         setIdeasURI(currentIdea)
-     
+
 
         setimageList(currentIdea.allfiles);
         setLoading(false);
 
-        // Comments and Replies
-        const totalComments = await contract.getMsgIDs(Number(id)); //Getting total comments (Number) of this idea
+        let totalComments = [];
+        try {
+          // Comments and Replies
+          totalComments = await contract.getMsgIDs(id); //Getting total comments (Number) of this idea
 
-        totalComments.forEach(async (comment) => {
-          //total comments number Iteration
-          const commentId = Number(comment);
-          let commentInfo = await contract.all_messages(commentId);
+          totalComments.forEach(async (comment) => {
+            //total comments number Iteration
+            const commentId = Number(comment);
+            let commentInfo = await contract.all_messages(commentId);
 
-          const object = JSON.parse(commentInfo.message);
-          let newComment = {
-            address: object.address,
-            user_info: object?.userid != undefined ? await getUserInfoById(object?.userid) : { fullName: object.address, imgIpfs: '' },
-
-            message: object.message,
-            date: object.date,
-            id: object.id,
-            replies: []
-          };
-
-          const totalReplies = await contract.getReplyIDs(Number(commentId)); //Getting total replies (Number) of this comment
-
-          totalReplies.forEach(async (reply) => {
-            const replyId = Number(reply);
-            let replyInfo = await contract.all_replies(replyId);
-            const object = JSON.parse(replyInfo.message);
-            let newReply = {
-              id: object.id,
-              user_info: object?.userid != undefined ? await getUserInfoById(object?.userid) : { fullName: object.address, imgIpfs: '' },
-              message: object.message,
+            const object = JSON.parse(commentInfo.message);
+            let newComment = {
               address: object.address,
-              date: object.date
-            };
-            newComment.replies.push(newReply);
-          });
+              user_info: object?.userid != undefined ? await getUserInfoById(object?.userid) : { fullName: object.address, imgIpfs: '' },
 
-          CommentsList.push(newComment);
-          removeElementFromArrayBYID(emptydata, 0, setemptydata);
-        });
-        setCommentsList(CommentsList);
+              message: object.message,
+              date: object.date,
+              id: object.id,
+              replies: []
+            };
+
+            const totalReplies = await contract.getReplyIDs(Number(commentId)); //Getting total replies (Number) of this comment
+
+            totalReplies.forEach(async (reply) => {
+              const replyId = Number(reply);
+              let replyInfo = await contract.all_replies(replyId);
+              const object = JSON.parse(replyInfo.message);
+              let newReply = {
+                id: object.id,
+                user_info: object?.userid != undefined ? await getUserInfoById(object?.userid) : { fullName: object.address, imgIpfs: '' },
+                message: object.message,
+                address: object.address,
+                date: object.date
+              };
+              newComment.replies.push(newReply);
+            });
+
+            CommentsList.push(newComment);
+            removeElementFromArrayBYID(emptydata, 0, setemptydata);
+          });
+          setCommentsList(CommentsList);
+        } catch (e) {
+        setCommentsList(totalComments)
+      
+        }
+
+       
       }
     } catch (error) {
       console.error(error);
@@ -190,7 +198,7 @@ export default function GrantIdeas() {
   }
 
   async function VoteIdea() {
-    
+
     if (IdeasURI.Referenda != 0) {
       setVotingShow(true);
       return;
@@ -199,7 +207,7 @@ export default function GrantIdeas() {
     const ToastId = toast.loading('Voting ...');
     const showBadgesAmount = [10, 50, 100, 150, 200, 250, 500];
     let shouldAdd = false;
-    
+
 
     let feed = JSON.stringify({
       votesAmount: IdeasURI.votesAmount + 1,
@@ -211,23 +219,23 @@ export default function GrantIdeas() {
       shouldAdd = true;
     }
 
-     function onSuccess() {
-      setIdeasURI({ ...IdeasURI, isVoted: !IdeasURI.isVoted,votesAmount : votesAmount +1 });
+    function onSuccess() {
+      setIdeasURI({ ...IdeasURI, isVoted: !IdeasURI.isVoted, votesAmount: IdeasURI.votesAmount + 1 });
       setVoting(false);
       window.location.reload();
     }
     if (PolkadotLoggedIn) {
       const txs = [
-        api._extrinsics.ideas.createVote(goalId,ideaId, (window.userid))
+        api._extrinsics.ideas.createVote(goalId, ideaId, (window.userid))
       ];
-      if (shouldAdd){
-        txs.push(  api._extrinsics.feeds.addFeed(JSON.stringify(feed), "vote", new Date().valueOf()))
+      if (shouldAdd) {
+        txs.push(api._extrinsics.feeds.addFeed(JSON.stringify(feed), "vote", new Date().valueOf()))
       }
 
       const transfer = api.tx.utility.batch(txs).signAndSend(userWalletPolkadot, { signer: userSigner }, (status) => {
         showToast(status, ToastId, 'Voted successfully!', () => { onSuccess() });
       });
-    }else{
+    } else {
 
       try {
         await sendTransaction(await window.contract.populateTransaction.create_goal_ideas_vote(goalId, ideaId, Number(window.userid), feed, shouldAdd));
@@ -247,8 +255,8 @@ export default function GrantIdeas() {
         return;
       }
     }
-  
-   
+
+
   }
 
   async function onClickDonate() {
@@ -275,7 +283,7 @@ export default function GrantIdeas() {
     let messLatestId = Number(await contract._message_ids());
     let newComment = {
       userid: Number(window.userid),
-      address: window?.ethereum?.selectedAddress?.toLocaleLowerCase().toString(),
+      address: window?.signerAddress.toLocaleUpperCase().toString(),
       message: Comment,
       date: new Date().toISOString(),
       id: messLatestId
@@ -290,7 +298,7 @@ export default function GrantIdeas() {
   }
 
   async function saveMessage(newComment) {
-    await sendTransaction(await window.contract.populateTransaction.sendMsg(Number(ideaId), JSON.stringify(newComment), window?.ethereum?.selectedAddress?.toLocaleLowerCase(), Number(window.userid)));
+    await sendTransaction(await window.contract.populateTransaction.sendMsg(ideaId, JSON.stringify(newComment), window?.signerAddress.toLocaleUpperCase(), Number(window.userid)));
     removeElementFromArrayBYID(emptydata, 0, setemptydata);
   }
 
@@ -300,11 +308,11 @@ export default function GrantIdeas() {
       id: replyLatestId,
       message: replyText,
       userid: Number(window.userid),
-      address: window?.ethereum?.selectedAddress?.toLocaleLowerCase().toString(),
+      address: window?.signerAddress.toLocaleUpperCase().toString(),
       date: new Date().toISOString()
     };
     CommentsList[MessageIndex].replies.push(newReply);
-    await sendTransaction(await window.contract.populateTransaction.sendReply(Number(MessageId), JSON.stringify(newReply), Number(ideaId), Number(window.userid)));
+    await sendTransaction(await window.contract.populateTransaction.sendReply(Number(MessageId), JSON.stringify(newReply), (ideaId), Number(window.userid)));
     removeElementFromArrayBYID(emptydata, 0, setemptydata);
   }
 

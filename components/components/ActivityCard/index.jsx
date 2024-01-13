@@ -7,6 +7,7 @@ import GoalCard from '../GoalCard';
 import { useEffect, useState } from 'react';
 import useContract from '../../../services/useContract';
 import useEnvironment from '../../../services/useEnvironment';
+import { usePolkadotContext } from '../../../contexts/PolkadotContext';
 
 const JoinActivity = ({ data }) => (
   <div className="flex gap-4 w-full items-center">
@@ -31,7 +32,7 @@ const BadgeActivity = ({ data }) => (
 );
 
 function VoteActivity({ data }) {
-  const { contract } = useContract();
+  const {api,GetAllIdeas} = usePolkadotContext();
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
@@ -44,33 +45,17 @@ function VoteActivity({ data }) {
   });
 
   async function fetchContractData() {
-    if (contract) {
-      const ideaURI = await contract.ideas_uri(Number(data.ideasid)); //Getting ideas uri
-      let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-      const object = JSON.parse(ideaURI).properties; //Getting ideas uri
-      let isvoted = false;
-      const Allvotes = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(data.ideasid)); //Getting all votes
-
-      for (let i = 0; i < Allvotes.length; i++) {
-        const element = Allvotes[i];
-        if (element == Number(window.userid)) isvoted = true;
-      }
-
-      setIdeaURI({
-        ideasId: Number(data.ideasid),
-        Title: object.Title.description,
-        logo: object.logo.description?.url,
-        donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
-        votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
-        isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false
-      });
+    if (api) {
+      let allIdeas = await GetAllIdeas()
+      let currentIdea=allIdeas.filter(e=>e.ideasId == data.ideasid)[0]
+      setIdeaURI(currentIdea);
+    
     }
   }
 
   useEffect(() => {
     fetchContractData();
-  }, [contract]);
+  }, [api]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -88,7 +73,7 @@ function VoteActivity({ data }) {
 }
 
 function GoalActivity({ data }) {
-  const { contract } = useContract();
+  const {api,GetAllGoals} = usePolkadotContext();
 
   const [goalURI, setGoalURI] = useState({
     goalId: 0,
@@ -102,36 +87,18 @@ function GoalActivity({ data }) {
   });
 
   async function fetchContractData() {
-    if (contract) {
-      const goalURIFull = await contract._goal_uris(Number(data.goalid));
-      const goalURI = JSON.parse(goalURIFull.goal_uri).properties;
-      const totalIdeasWithEmpty = await contract.get_all_ideas_by_goal_id(Number(data.goalid)); //Getting total goal (Number)
+    if (api) {
+      let allGoals = await GetAllGoals()
+      let currentGoal=allGoals.filter(e=>e.goalId == data.goalid)[0]
+      setGoalURI(currentGoal);
+    
 
-      let totalIdeas = totalIdeasWithEmpty.filter((e) => e !== '');
-
-      let total_reached = 0;
-      for (let i = 0; i < totalIdeas.length; i++) {
-        const element = totalIdeas[i];
-
-        const ideasId = await contract.get_ideas_id_by_ideas_uri(element);
-        let donation = Number((await contract._ideas_uris(Number(ideasId))).donation) / 1e18;
-        total_reached += donation;
-      }
-
-      setGoalURI({
-        goalId: Number(data.goalid),
-        Title: goalURI.Title.description,
-        logo: goalURI.logo.description?.url,
-        Budget: goalURI.Budget.description,
-        ideasCount: Object.keys(totalIdeas).filter((item, idx) => item !== '').length,
-        reached: total_reached
-      });
     }
   }
 
   useEffect(() => {
     fetchContractData();
-  }, [contract]);
+  }, [api]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -149,7 +116,8 @@ function GoalActivity({ data }) {
 }
 
 function DonationActivity({ data }) {
-  const { contract } = useContract();
+  const {api,GetAllIdeas} = usePolkadotContext();
+
   const [currency, setCurrency] = useState('');
 
   const [ideaURI, setIdeaURI] = useState({
@@ -163,27 +131,11 @@ function DonationActivity({ data }) {
   });
 
   async function fetchContractData() {
-    if (contract) {
-      const ideaURI = await contract.ideas_uri(Number(data.ideasid)); //Getting ideas uri
-      let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-      const object = JSON.parse(ideaURI).properties; //Getting ideas uri
-      let isvoted = false;
-      const Allvotes = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(data.ideasid)); //Getting all votes
-
-      for (let i = 0; i < Allvotes.length; i++) {
-        const element = Allvotes[i];
-        if (element == Number(window.userid)) isvoted = true;
-      }
-
-      setIdeaURI({
-        ideasId: Number(data.ideasid),
-        Title: object.Title.description,
-        logo: object.logo.description?.url,
-        donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
-        votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
-        isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false
-      });
+    if (api) {
+      let allIdeas = await GetAllIdeas()
+      let currentIdea=allIdeas.filter(e=>e.ideasId == data.ideasid)[0]
+      setIdeaURI(currentIdea);
+    
     }
   }
 
@@ -191,7 +143,7 @@ function DonationActivity({ data }) {
     setCurrency(useEnvironment.getCurrency());
 
     fetchContractData();
-  }, [contract]);
+  }, [api]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -212,7 +164,7 @@ function DonationActivity({ data }) {
 }
 
 function IdeaActivity({ data, hideGoToButton }) {
-  const { contract } = useContract();
+  const {api,GetAllIdeas} = usePolkadotContext();
 
   const [ideaURI, setIdeaURI] = useState({
     ideasId: 0,
@@ -225,33 +177,17 @@ function IdeaActivity({ data, hideGoToButton }) {
   });
 
   async function fetchContractData() {
-    if (contract) {
-      const ideaURI = await contract.ideas_uri(Number(data.ideasid)); //Getting ideas uri
-      let Goalid = await contract.get_goal_id_from_ideas_uri(ideaURI);
-      const object = JSON.parse(ideaURI).properties; //Getting ideas uri
-      let isvoted = false;
-      const Allvotes = await contract.get_ideas_votes_from_goal(Number(Goalid), Number(data.ideasid)); //Getting all votes
-
-      for (let i = 0; i < Allvotes.length; i++) {
-        const element = Allvotes[i];
-        if (element == Number(window.userid)) isvoted = true;
-      }
-
-      setIdeaURI({
-        ideasId: Number(data.ideasid),
-        Title: object.Title.description,
-        logo: object.logo.description?.url,
-        donation: Number((await contract._ideas_uris(Number(data.ideasid))).donation) / 1e18,
-        votes: Object.keys(Allvotes).filter((item, idx) => item !== '').length,
-        isVoted: isvoted,
-        isOwner: object.user_id.description == Number(window.userid) ? true : false
-      });
+    if (api) {
+      let allIdeas = await GetAllIdeas()
+      let currentIdea=allIdeas.filter(e=>e.ideasId == data.ideasid)[0]
+      setIdeaURI(currentIdea);
+    
     }
   }
 
   useEffect(() => {
     fetchContractData();
-  }, [contract]);
+  }, [api]);
 
   return (
     <div className="flex flex-col gap-3">

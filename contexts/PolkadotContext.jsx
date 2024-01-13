@@ -140,13 +140,13 @@ export function PolkadotProvider({ children }) {
     const arr = [];
     for (let i = 0; i < totalDAOCount; i++) {
       let object = '';
-      let recievewallet = '';
+      let originalwallet = '';
       if (prefix == 'm_') {
         object = JSON.parse(allDAOs[i]);
       } else {
         if (allDAOs[i]?.daoUri) {
           object = JSON.parse(allDAOs[i].daoUri?.toString());
-          recievewallet = allDAOs[i].daoWallet?.toString();
+          originalwallet = allDAOs[i].daoWallet?.toString();
         }
       }
 
@@ -161,8 +161,8 @@ export function PolkadotProvider({ children }) {
           user_info: user_info,
           user_id: object.properties?.user_id?.description,
           logo: object.properties.logo.description?.url,
-          wallet: object.properties.wallet.description,
-          recievewallet: recievewallet,
+          wallet:originalwallet,
+          recievewallet:  object.properties.wallet.description,
           recievetype: prefix == 'm_' ? 'Polkadot' : 'EVM',
           SubsPrice: object.properties?.SubsPrice?.description,
           Created_Date: object.properties?.Created_Date?.description,
@@ -550,7 +550,7 @@ export function PolkadotProvider({ children }) {
         let totalVotesCount = Number(await api._query.ideas.votesIds());
         let arr = [];
         for (let i = 0; i < totalVotesCount; i++) {
-          const element = await api._query.ideas.VoteById(i);
+          const element = await api._query.ideas.voteById(i);
           let newElm = {
             id: element['__internal__raw'].id.toString(),
             goalId: element['__internal__raw'].goalId.toString(),
@@ -604,7 +604,7 @@ export function PolkadotProvider({ children }) {
         let totalDonationsCount = Number(await api._query.ideas.donationsIds());
         let arr = [];
         for (let i = 0; i < totalDonationsCount; i++) {
-          const element = await api._query.ideas.DonationsById(i);
+          const element = await api._query.ideas.donationsById(i);
           let newElm = {
             id: element['__internal__raw'].id.toString(),
             ideasId: element['__internal__raw'].ideasId.toString(),

@@ -28,6 +28,9 @@ export default function Goal() {
     End_Date: '',
     StructureLeft: [],
     StructureRight: [],
+    user_info:{
+      fullName:""
+    },
     wallet: '',
     logo: '',
     isOwner: true
@@ -55,9 +58,12 @@ export default function Goal() {
   useEffect(() => {
     setCurrency(useEnvironment.getCurrency());
     getGoalID();
-    fetchContractData();
   }, [api, router]);
 
+  useEffect(()=>{
+    fetchContractData();
+
+  },[api, goalIdTxt])
 
   function getGoalID() {
     const goalIdParam = router.query.goalId;
@@ -91,6 +97,7 @@ export default function Goal() {
         setGoalDAOURI(goalDAO);
 
         let user_info = await getUserInfoById(Number(goalURIFull.UserId));
+        goalURIFull.user_info = user_info;
         let allJoined = await GetAllJoined();
         let currentJoined = (allJoined).filter((e) => (e?.daoId) == (goalURIFull.daoId.toString()))
         let joinedInfo = currentJoined.filter((e) => e?.user_id.toString() == window.userid.toString())

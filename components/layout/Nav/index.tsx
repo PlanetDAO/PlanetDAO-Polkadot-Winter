@@ -32,11 +32,11 @@ export function Nav(): JSX.Element {
       return;
     }
     if (window.localStorage.getItem('login-type') === 'metamask' && (await window.ethereum._metamask.isUnlocked())) {
-      if (window?.ethereum?.selectedAddress?.toLocaleLowerCase() != null && api && userInfo) {
+      if (window?.ethereum?.selectedAddress?.toLocaleUpperCase() != null && api && userInfo) {
         try {
           const Web3 = require('web3');
           const web3 = new Web3(window.ethereum);
-          let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleLowerCase());
+          let Balance = await web3.eth.getBalance(window?.ethereum?.selectedAddress?.toLocaleUpperCase());
 
           let token = ' ' + getChain(Number(window.ethereum.networkVersion)).nativeCurrency.symbol;
 
